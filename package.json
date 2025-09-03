@@ -7,7 +7,7 @@
   "scripts": {
     "dev": "concurrently \"npm run dev:react\" \"npm run dev:tailwind\" \"npm run dev:electron\"",
     "dev:react": "vite",
-    "dev:tailwind": "tailwindcss -i ./src/index.css -o ./src/App.css -w",
+    "dev:tailwind": "tailwindcss -i ./src/index.css -o ./dist/assets/output.css -w",
     "dev:electron": "electron .",
     "build": "vite build",
     "lint": "eslint .",
