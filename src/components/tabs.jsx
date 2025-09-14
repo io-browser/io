@@ -9,12 +9,12 @@ function Tabs() {
 
     return (
         <div className="bg-shark-950 text-shark-50 flex items-center justify-between w-full h-10">
-            <div className="flex flex-1 h-full overflow-x-auto scrollbar-none">
+            <div className="flex flex-1 h-full overflow-x-auto p-1 scrollbar-none">
                 {tabs.map(tab => (
                     <div
                         key={tab.tabId}
-                        className={`flex items-center justify-between px-2 py-1 mr-1 cursor-pointer transition-colors group
-                        ${tab.isTabActive ? 'bg-shark-800' : 'bg-shark-900 hover:bg-shark-700'}`}
+                        className={`flex items-center justify-between px-2 py-1 mr-1 cursor-pointer rounded transition-colors group
+                        ${tab.isTabActive ? 'bg-shark-800' : 'bg-shark-900'}`}
                         style={{ minWidth: "160px", maxWidth: "200px" }}
                     >
                         <div className="flex items-center gap-1 overflow-hidden">
@@ -26,7 +26,7 @@ function Tabs() {
                             <p className="truncate text-sm">{tab.tabTitle}</p>
                         </div>
                         <button
-                            className="ml-2 opacity-0 group-hover:opacity-100 hover:bg-shark-700 rounded"
+                            className="ml-2 opacity-0 group-hover:opacity-100 hover:bg-shark-600 rounded"
                             onClick={() => dispatch(deleteTab({ tabId: tab.tabId }))}
                         >
                             <XMarkIcon className="w-4 h-4" />
