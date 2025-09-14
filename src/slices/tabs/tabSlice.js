@@ -28,6 +28,8 @@ export const tabSlice = createSlice({
 
         deleteTab: (state, actions) => {
 
+            if (state.tabs.length <= 1) return;
+
             const { tabId } = actions.payload
             state.tabs = state.tabs.filter(t => t.tabId != tabId);
         },
