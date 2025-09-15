@@ -5,8 +5,10 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+let mainWindow;
+
 function createWindow() {
-    let win = new BrowserWindow({
+    mainWindow = new BrowserWindow({
         width: 1200,
         height: 800,
         webPreferences: {
@@ -16,21 +18,22 @@ function createWindow() {
             preload: path.join(__dirname, 'preload.cjs')
         },
         show: false,
+        frame: false
     });
 
     const startUrl = !app.isPackaged ? 'http://localhost:5173' : `file://${__dirname, '/dist-react/index.html'}`;
 
-    win.loadURL(startUrl);
+    mainWindow.loadURL(startUrl);
 
-    win.once('ready-to-show', () => {
-        win.show();
+    mainWindow.once('ready-to-show', () => {
+        mainWindow.show();
     });
 
-    win.on('closed', () => {
-        win = null;
+    mainWindow.on('closed', () => {
+        mainWindow = null;
     });
 
-    return win;
+    return mainWindow;
 }
 
 app.on('ready', createWindow);
@@ -48,6 +51,23 @@ app.on('activate', () => {
     }
 });
 
-ipcMain.handle('greet', (_, name) => {
-    return `Hello, ${name}!`
+ipcMain.on(`window-control`, (_, action) => {
+
+    if (!mainWindow) return;
+
+    switch (action) {
+        case "minimize":
+            mainWindow.minimize();
+            break;
+        case "maximize":
+            if (mainWindow.isMaximized()) {
+                mainWindow.unmaximize();
+            } else {
+                mainWindow.maximize();
+            }
+            break;
+        case "close":
+            mainWindow.close();
+            break;
+    }
 })
