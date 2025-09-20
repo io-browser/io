@@ -1,11 +1,13 @@
 import { app, BrowserWindow, ipcMain } from 'electron';
 import path from "path";
 import { fileURLToPath } from 'url';
+import TabsManager from './libs/tabsManager.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-let mainWindow;
+export let mainWindow;
+export let TabsClient;
 
 function createWindow() {
     mainWindow = new BrowserWindow({
@@ -32,6 +34,22 @@ function createWindow() {
     mainWindow.on('closed', () => {
         mainWindow = null;
     });
+
+    mainWindow.on('resize', () => {
+        const currentView = mainWindow.getBrowserView();
+        if (currentView) {
+            const bounds = mainWindow.getBounds();
+
+            currentView.setBounds({
+                x: 0,
+                y: 80,
+                width: bounds.width,
+                height: bounds.height - 80
+            });
+        }
+    });
+
+    TabsClient = new TabsManager(mainWindow);
 
     return mainWindow;
 }
@@ -70,4 +88,31 @@ ipcMain.on(`window-control`, (_, action) => {
             mainWindow.close();
             break;
     }
+})
+
+ipcMain.on(`create-new-tab`, (_, action) => {
+    const { tabId, url } = action;
+
+    if (!tabId) return;
+
+    TabsClient.createTab(tabId, url);
+});
+
+ipcMain.on(`close-tab`, (_, action) => {
+    const tabId = action;
+
+    if (!tabId) return;
+
+    TabsClient.closeTab(tabId);
+});
+
+ipcMain.on(`switch-tab`, (_, action) => {
+    const tabId = action;
+
+    if (!tabId) return;
+
+    TabsClient.switchToTab(tabId);
+
+    // Update bounds
+    TabsClient.updateActiveTabBounds();
 })
