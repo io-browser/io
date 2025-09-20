@@ -129,3 +129,8 @@ ipcMain.on(`go-back`, (_, action) => {
 
     TabsClient.goBack();
 })
+
+ipcMain.on(`go-forward`, (_, action) => {
+
+    TabsClient.goForward();
+})

@@ -9,6 +9,7 @@ contextBridge.exposeInMainWorld('electron', {
     switchTab: ({ tabId }) => ipcRenderer.send(`switch-tab`, `${tabId}`),
     reloadTab: ({ tabId }) => ipcRenderer.send(`reload-tab`, `${tabId}`),
     goBack: () => ipcRenderer.send(`go-back`),
+    goForward: () => ipcRenderer.send(`go-forward`),
 
     onTabCreated: (callback) => ipcRenderer.on(`tab-created`, callback),
     onTabTitleUpdated: (callback) => ipcRenderer.on(`tab-title-updated`, callback),

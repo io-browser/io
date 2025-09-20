@@ -21,7 +21,7 @@ function Omnibox() {
                     <button className="h-full p-2 rounded hover:bg-shark-600" onClick={() => window.electron.goBack()}>
                         <ArrowLeftIcon className="w-4 h-4" />
                     </button>
-                    <button className="h-full p-2 rounded hover:bg-shark-600">
+                    <button className="h-full p-2 rounded hover:bg-shark-600" onClick={() => window.electron.goForward()}>
                         <ArrowRightIcon className="w-4 h-4" />
                     </button>
                     <button className="h-full p-2 rounded hover:bg-shark-600" onClick={() => window.electron.reloadTab({ tabId: activeTabId })}>
