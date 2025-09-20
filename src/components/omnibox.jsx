@@ -1,9 +1,18 @@
-import { useSelector, useDispatch } from "react-redux";
-import { createTab, deleteTab } from "../slices/tabs/tabSlice";
+import { useSelector } from "react-redux";
 import { ArrowLeftIcon, ArrowRightIcon, ArrowPathRoundedSquareIcon, Bars3Icon, StarIcon, ChevronDownIcon, BookmarkIcon } from "@heroicons/react/24/solid"
-import { Square2StackIcon } from "@heroicons/react/24/outline";
+import { useEffect, useState } from "react";
 
 function Omnibox() {
+
+    const { tabs, activeTabId } = useSelector(state => state.tabs);
+    const [omniboxUrl, setOmniboxUrl] = useState('');
+
+    useEffect(() => {
+        const activeTabIndex = tabs.findIndex(tab => tab.tabId == activeTabId);
+        const activeTab = tabs[activeTabIndex];
+
+        setOmniboxUrl(activeTab.tabUrl);
+    }, [activeTabId])
 
     return (
         <div className="bg-shark-800 text-shark-50 flex items-center px-1 justify-between w-full h-10">
@@ -26,7 +35,7 @@ function Omnibox() {
                             <ChevronDownIcon className="w-3 h-3" />
                         </div>
                         <div className="h-full flex-1 text-[14px] flex items-center">
-                            <input type="text" placeholder="Search..." className="border-none focus:outline-none w-full" />
+                            <input type="text" value={omniboxUrl} onChange={(e) => setOmniboxUrl(e.target.value)} placeholder="Search..." className="border-none focus:outline-none w-full" />
                         </div>
                         <div className="cursor-pointer flex items-center justify-baseline px-1 gap-4">
                             <BookmarkIcon className="w-4 h-4" />
@@ -35,7 +44,7 @@ function Omnibox() {
                 </div>
             </div>
             <div className="flex items-center px-2">
-                <button className="h-full rounded cursor-pointer">
+                <button className="h-full rounded cursor-pointer" onClick={() => window.electron.movez({ value })}>
                     <Bars3Icon className="w-6 h-6" />
                 </button>
             </div>
