@@ -124,3 +124,8 @@ ipcMain.on(`reload-tab`, (_, action) => {
 
     TabsClient.reloadTab(tabId);
 })
+
+ipcMain.on(`go-back`, (_, action) => {
+
+    TabsClient.goBack();
+})
