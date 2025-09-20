@@ -18,7 +18,7 @@ function Omnibox() {
         <div className="bg-shark-800 text-shark-50 flex items-center px-1 justify-between w-full h-10">
             <div className="flex items-center justify-baseline h-full flex-1 gap-10 max-w-[90%]">
                 <div>
-                    <button className="h-full p-2 rounded hover:bg-shark-600">
+                    <button className="h-full p-2 rounded hover:bg-shark-600" onClick={() => window.electron.goBack()}>
                         <ArrowLeftIcon className="w-4 h-4" />
                     </button>
                     <button className="h-full p-2 rounded hover:bg-shark-600">
