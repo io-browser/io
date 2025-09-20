@@ -210,6 +210,18 @@ export default class TabsManager {
         return true;
     }
 
+    reloadTab(tabId) {
+
+        const tab = this.tabs.get(tabId);
+
+        if (!tab) {
+            console.error(`Tab ${tabId} not found`);
+            return false;
+        }
+
+        tab.view.webContents.reload()
+    }
+
     setupResizeHandling() {
         // Handle resize events
         this.mainWindow.on('resize', () => {

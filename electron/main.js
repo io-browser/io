@@ -115,4 +115,12 @@ ipcMain.on(`switch-tab`, (_, action) => {
 
     // Update bounds
     TabsClient.updateActiveTabBounds();
+});
+
+ipcMain.on(`reload-tab`, (_, action) => {
+    const tabId = action;
+
+    if (!tabId) return;
+
+    TabsClient.reloadTab(tabId);
 })
