@@ -7,6 +7,7 @@ contextBridge.exposeInMainWorld('electron', {
     createNewTab: ({ tabId, url }) => ipcRenderer.send(`create-new-tab`, { tabId, url }),
     closeTab: ({ tabId }) => ipcRenderer.send(`close-tab`, `${tabId}`),
     switchTab: ({ tabId }) => ipcRenderer.send(`switch-tab`, `${tabId}`),
+    reloadTab: ({ tabId }) => ipcRenderer.send(`reload-tab`, `${tabId}`),
 
     onTabCreated: (callback) => ipcRenderer.on(`tab-created`, callback),
     onTabTitleUpdated: (callback) => ipcRenderer.on(`tab-title-updated`, callback),

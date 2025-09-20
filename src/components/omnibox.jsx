@@ -1,5 +1,5 @@
 import { useSelector } from "react-redux";
-import { ArrowLeftIcon, ArrowRightIcon, ArrowPathRoundedSquareIcon, Bars3Icon, StarIcon, ChevronDownIcon, BookmarkIcon } from "@heroicons/react/24/solid"
+import { ArrowLeftIcon, ArrowRightIcon, ArrowPathRoundedSquareIcon, Bars3Icon, StarIcon, ChevronDownIcon, BookmarkIcon, XMarkIcon } from "@heroicons/react/24/solid"
 import { useEffect, useState } from "react";
 
 function Omnibox() {
@@ -24,7 +24,7 @@ function Omnibox() {
                     <button className="h-full p-2 rounded hover:bg-shark-600">
                         <ArrowRightIcon className="w-4 h-4" />
                     </button>
-                    <button className="h-full p-2 rounded hover:bg-shark-600">
+                    <button className="h-full p-2 rounded hover:bg-shark-600" onClick={() => window.electron.reloadTab({ tabId: activeTabId })}>
                         <ArrowPathRoundedSquareIcon className="w-4 h-4" />
                     </button>
                 </div>
