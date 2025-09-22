@@ -1,5 +1,6 @@
 import { WebContentsView } from "electron";
 import { nanoid } from "@reduxjs/toolkit";
+import { isHttpUrl } from "../utils/index.js";
 
 export default class TabsManager {
     constructor(mainWindow) {
@@ -220,6 +221,20 @@ export default class TabsManager {
         }
 
         tab.view.webContents.reload()
+    }
+
+    updateTabUrl(tabId, url) {
+
+        const tab = this.tabs.get(tabId);
+
+        if (!tab) {
+            console.error(`Tab ${tabId} not found`);
+            return false;
+        }
+
+        const isValidHttpUrl = isHttpUrl(url)
+        if (isValidHttpUrl) tab.view.webContents.loadURL(url);
+        else tab.view.webContents.loadURL(`https://startpage.com/sp/search?query=${url}`)
     }
 
     goBack() {

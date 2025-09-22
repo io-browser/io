@@ -134,3 +134,11 @@ ipcMain.on(`go-forward`, (_, action) => {
 
     TabsClient.goForward();
 })
+
+ipcMain.on(`update-tab-url`, (_, action) => {
+    const { tabId, url } = action;
+
+    if (!tabId) return;
+
+    TabsClient.updateTabUrl(tabId, url);
+})
