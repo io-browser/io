@@ -1,6 +1,9 @@
 import { WebContentsView } from "electron";
 import { nanoid } from "@reduxjs/toolkit";
 import { isHttpUrl } from "../utils/index.js";
+import HistoryManager from "./historyManager.js";
+
+const history = new HistoryManager();
 
 export default class TabsManager {
     constructor(mainWindow) {
@@ -101,12 +104,15 @@ export default class TabsManager {
         tab.view.webContents.on(`page-title-updated`, (_, title) => {
             tab.title = title;
 
+            history.updateTitle(title)
             this.mainWindow.webContents.send('tab-title-updated', { tabId, title });
         });
 
         tab.view.webContents.on('page-favicon-updated', (event, favicons) => {
             const favicon = favicons.length > 0 ? favicons[0] : null;
             tab.favicon = favicon;
+
+            history.updateFavicon(favicon)
             this.mainWindow.webContents.send('tab-favicon-updated', { tabId, favicon });
         });
 
@@ -155,6 +161,10 @@ export default class TabsManager {
         tab.view.webContents.on('did-navigate', (_, url) => {
             tab.url = url;
 
+            if (history.pendingEntry) {
+                history.pendingEntry.url = url;
+            }
+
             this.mainWindow.webContents.send('tab-url-updated', {
                 tabId,
                 url,
@@ -170,6 +180,19 @@ export default class TabsManager {
                     url,
                 });
             }
+        });
+
+        tab.view.webContents.on('did-start-navigation', (event, url, isInPlace, isMainFrame) => {
+            if (isMainFrame && !isInPlace) {
+                history.createPendingEntry(url);
+            }
+        });
+
+        tab.view.webContents.on('did-finish-load', () => {
+            // Small delay to ensure title/favicon events have fired
+            setTimeout(() => {
+                history.finalizeEntry();
+            }, 100);
         });
     }
 

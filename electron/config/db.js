@@ -3,7 +3,7 @@ import fs from "fs";
 import path from "path";
 import electron from "electron";
 
-const dbPath = path.join(electron.app.getAppPath('userData'), 'app.db');
+const dbPath = path.join(electron.app.getPath('userData'), 'app.db');
 let db;
 
 
@@ -35,6 +35,9 @@ export async function connect() {
     }
 }
 
-
+export function saveDb(db) {
+    const data = db.export();
+    fs.writeFileSync(dbPath, Buffer.from(data));
+}
 
 export default () => db;
