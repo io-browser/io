@@ -1,10 +1,12 @@
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
+import { updateTabUrl } from "../slices/tabs/tabSlice";
 import { ArrowLeftIcon, ArrowRightIcon, ArrowPathRoundedSquareIcon, Bars3Icon, StarIcon, ChevronDownIcon, BookmarkIcon, XMarkIcon } from "@heroicons/react/24/solid"
 import { useEffect, useState } from "react";
 
 function Omnibox() {
 
     const { tabs, activeTabId } = useSelector(state => state.tabs);
+    const dispatch = useDispatch();
     const [omniboxUrl, setOmniboxUrl] = useState('');
 
     useEffect(() => {
@@ -13,6 +15,19 @@ function Omnibox() {
 
         setOmniboxUrl(activeTab.tabUrl);
     }, [activeTabId])
+
+    function handleOmniboxSearchKeyDown(e) {
+        const value = e.target.value?.trim();
+
+        if (e.key == 'Enter') return window.electron.updateTabUrl({ tabId: activeTabId, url: value });
+    }
+
+    function handleOmniboxSearch(e) {
+        const value = e.target.value?.trim();
+
+        dispatch(updateTabUrl({ tabId: activeTabId, tabUrl: value }));
+        setOmniboxUrl(value)
+    }
 
     return (
         <div className="bg-shark-800 text-shark-50 flex items-center px-1 justify-between w-full h-10">
@@ -35,7 +50,7 @@ function Omnibox() {
                             <ChevronDownIcon className="w-3 h-3" />
                         </div>
                         <div className="h-full flex-1 text-[14px] flex items-center">
-                            <input type="text" value={omniboxUrl} onChange={(e) => setOmniboxUrl(e.target.value)} placeholder="Search..." className="border-none focus:outline-none w-full" />
+                            <input type="text" value={omniboxUrl} onChange={handleOmniboxSearch} onKeyDown={handleOmniboxSearchKeyDown} placeholder="Search..." className="border-none focus:outline-none w-full" />
                         </div>
                         <div className="cursor-pointer flex items-center justify-baseline px-1 gap-4">
                             <BookmarkIcon className="w-4 h-4" />
