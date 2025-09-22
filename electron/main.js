@@ -2,6 +2,7 @@ import { app, BrowserWindow, ipcMain } from 'electron';
 import path from "path";
 import { fileURLToPath } from 'url';
 import TabsManager from './libs/tabsManager.js';
+import db, { connect } from './config/db.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -9,7 +10,7 @@ const __dirname = path.dirname(__filename);
 export let mainWindow;
 export let TabsClient;
 
-function createWindow() {
+async function createWindow() {
     mainWindow = new BrowserWindow({
         width: 1200,
         height: 800,
@@ -51,6 +52,8 @@ function createWindow() {
 
     TabsClient = new TabsManager(mainWindow);
 
+    await connect();
+    console.log(db().exec(`SELECT * FROM history`))
     return mainWindow;
 }
 
@@ -63,9 +66,9 @@ app.on('window-all-closed', () => {
 });
 
 // Re-create window on macOS when dock icon is clicked
-app.on('activate', () => {
+app.on('activate', async () => {
     if (BrowserWindow.getAllWindows().length === 0) {
-        createWindow();
+        await createWindow();
     }
 });
 
