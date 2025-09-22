@@ -53,7 +53,6 @@ async function createWindow() {
     TabsClient = new TabsManager(mainWindow);
 
     await connect();
-    console.log(db().exec(`SELECT * FROM history`))
     return mainWindow;
 }
 
