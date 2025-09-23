@@ -33,7 +33,6 @@ function Tabs() {
         });
 
         window.electron.onTabLoadingStart((_, { tabId }) => {
-
             dispatch(updateTabLoadingState({ tabId, isLoading: true }))
         });
 
@@ -42,10 +41,6 @@ function Tabs() {
             dispatch(updateTabLoadingState({ tabId, isLoading: false }))
         });
     }, [])
-
-    useEffect(() => {
-        console.log(`Current active tab: ${activeTabId}`)
-    }, [activeTabId])
 
     const handleCreateTab = () => {
         const tabId = nanoid();
@@ -71,8 +66,6 @@ function Tabs() {
         } else if (src?.startsWith("data:")) {
             finalSrc = `${encodeURIComponent(src)}`;
         }
-
-        console.log(src);
 
         return <img src={finalSrc} alt={alt} className="w-4 h-4" />;
     }

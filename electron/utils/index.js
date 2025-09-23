@@ -1,5 +1,5 @@
-import { isHttpUrl } from "./isHttpUrl.js";
+import { isValidUrl } from "./isValidUrl.js";
 
 export {
-    isHttpUrl
+    isValidUrl
 }
