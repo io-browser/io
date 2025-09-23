@@ -1,7 +1,12 @@
 import { WebContentsView } from "electron";
 import { nanoid } from "@reduxjs/toolkit";
-import { isHttpUrl } from "../utils/index.js";
+import path from "path";
+import { fileURLToPath } from "url"
+import { isValidUrl } from "../utils/index.js";
 import HistoryManager from "./historyManager.js";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const history = new HistoryManager();
 
@@ -25,6 +30,7 @@ export default class TabsManager {
                 webSecurity: true,
                 allowRunningInsecureContent: false,
                 experimentalFeatures: false,
+                preload: path.join(__dirname, "../", 'preload.cjs'),
             }
         });
 
@@ -255,8 +261,10 @@ export default class TabsManager {
             return false;
         }
 
-        const isValidHttpUrl = isHttpUrl(url)
-        if (isValidHttpUrl) tab.view.webContents.loadURL(url);
+        const isValid = isValidUrl(url)
+
+        if (isValid && (isValid.protocol === "http:" || isValid.protocol === "https:")) tab.view.webContents.loadURL(url);
+        else if (isValid && isValid.protocol === "io:") tab.view.webContents.loadURL(`http://localhost:5173/#/${isValid.host}`)
         else tab.view.webContents.loadURL(`https://startpage.com/sp/search?query=${url}`)
     }
 

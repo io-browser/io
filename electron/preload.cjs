@@ -11,6 +11,7 @@ contextBridge.exposeInMainWorld('electron', {
     goBack: () => ipcRenderer.send(`go-back`),
     goForward: () => ipcRenderer.send(`go-forward`),
     updateTabUrl: ({ tabId, url }) => ipcRenderer.send(`update-tab-url`, { tabId, url }),
+    getHistory: ({ page, limit }) => ipcRenderer.invoke(`get-history:db`, { page, limit }),
 
     onTabCreated: (callback) => ipcRenderer.on(`tab-created`, callback),
     onTabTitleUpdated: (callback) => ipcRenderer.on(`tab-title-updated`, callback),
