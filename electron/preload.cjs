@@ -17,6 +17,7 @@ contextBridge.exposeInMainWorld('electron', {
     openInFileManager: ({ filePath }) => ipcRenderer.send(`open-in-file-manager`, { filePath }),
 
     onTabCreated: (callback) => ipcRenderer.on(`tab-created`, callback),
+    onTabClosed: (callback) => ipcRenderer.on(`tab-closed`, callback),
     onTabTitleUpdated: (callback) => ipcRenderer.on(`tab-title-updated`, callback),
     onTabUrlUpdated: (callback) => ipcRenderer.on('tab-url-updated', callback),
     onTabLoadingStart: (callback) => ipcRenderer.on('tab-loading-start', callback),

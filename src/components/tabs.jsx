@@ -20,6 +20,11 @@ function Tabs() {
             dispatch(switchTab({ tabId }))
         })
 
+        window.electron.onTabClosed((_, { tabId }) => {
+            dispatch(deleteTab({ tabId }));
+            window.electron.closeTab({ tabId });
+        })
+
         window.electron.onTabTitleUpdated((_, { tabId, title }) => {
             dispatch(updateTabTitle({ tabId, tabTitle: title }))
         });

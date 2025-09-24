@@ -290,6 +290,18 @@ export default class TabsManager {
         tab.view.webContents.navigationHistory.goForward()
     }
 
+    toggleDevTools() {
+
+        const tab = this.tabs.get(this.activeTabId);
+
+        if (!tab) {
+            console.error(`No active tab found`);
+            return false;
+        }
+
+        tab.view.webContents.toggleDevTools()
+    }
+
     setupResizeHandling() {
         // Handle resize events
         this.mainWindow.on('resize', () => {
