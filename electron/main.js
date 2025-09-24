@@ -3,6 +3,7 @@ import path from "path";
 import { fileURLToPath } from 'url';
 import TabsManager from './libs/tabsManager.js';
 import db, { connect, saveDb } from './config/db.js';
+import shortcuts from './shortcuts/index.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -82,6 +83,8 @@ async function createWindow() {
     TabsClient = new TabsManager(mainWindow);
 
     await connect();
+
+    shortcuts(mainWindow, TabsClient)
     return mainWindow;
 }
 
