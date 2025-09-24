@@ -3,7 +3,7 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
-  "main": "electron/main.js",
+  "main": "electron/app.js",
   "scripts": {
     "dev": "concurrently \"npm run dev:react\" \"npm run dev:tailwind\" \"npm run dev:electron\"",
     "dev:react": "vite",

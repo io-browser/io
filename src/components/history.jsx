@@ -10,7 +10,7 @@ export default function History() {
     }, [])
 
     async function loadHistory() {
-        console.log('loading history')
+
         const history = await window.electron?.getHistory({ page: pageNumber, limit: 50 });
 
         if (!history?.length) return;
@@ -21,7 +21,7 @@ export default function History() {
 
     function handleScroll() {
         const container = containerReference.current;
-        console.log(container)
+
         if (!container) return;
 
         if ((container.scrollTop + container.clientHeight) >= container.scrollHeight) loadHistory();
