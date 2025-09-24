@@ -1,8 +1,8 @@
-import { app, BrowserWindow, ipcMain } from 'electron';
+import { app, BrowserWindow, ipcMain, dialog, shell } from 'electron';
 import path from "path";
 import { fileURLToPath } from 'url';
 import TabsManager from './libs/tabsManager.js';
-import db, { connect } from './config/db.js';
+import db, { connect, saveDb } from './config/db.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -49,6 +49,35 @@ async function createWindow() {
             });
         }
     });
+
+    mainWindow.webContents.session.on('will-download', async (event, item) => {
+        try {
+
+            event.preventDefault()
+            const downloadItemName = item.getFilename();
+            const downloadLink = item.getURL();
+            const defaultPath = path.join(app.getPath('downloads'), downloadItemName);
+
+            const { canceled, filePath } = await dialog.showSaveDialog({
+                title: downloadLink,
+                defaultPath,
+                buttonLabel: 'Save',
+            });
+
+            if (canceled || !filePath) {
+                item.cancel();
+                return;
+            }
+
+            item.setSavePath(filePath);
+            const icon = await app.getFileIcon(filePath, { size: 'normal' });
+
+            db()?.run(`INSERT INTO downloads (downloadItemName, downloadLink, savedPath, icon) VALUES (?, ?, ?, ?)`, [downloadItemName, downloadLink, filePath, icon.toDataURL()])
+            saveDb(db())
+        } catch (error) {
+            console.error(error)
+        }
+    })
 
     TabsClient = new TabsManager(mainWindow);
 
@@ -155,4 +184,33 @@ ipcMain.handle(`get-history:db`, (_, action) => {
     if (!result) return [];
 
     return result?.[0]?.['values']
+})
+
+ipcMain.handle(`get-downloads:db`, (_, action) => {
+    const { limit = 10, page = 1 } = action;
+
+    const offset = (page - 1) * limit
+
+    const result = db()?.exec(`SELECT * FROM downloads ORDER BY createdAt DESC LIMIT ? OFFSET ?`, [limit, offset]);
+
+    if (!result) return [];
+
+    return result?.[0]?.['values']
+});
+
+ipcMain.on(`delete-download-item:db`, (_, action) => {
+    const { id } = action;
+
+    if (!id) return;
+
+    db()?.run(`DELETE FROM downloads WHERE id = ?`, [id]);
+    saveDb(db())
+});
+
+ipcMain.on(`open-in-file-manager`, (_, action) => {
+    const { filePath } = action;
+
+    if (!filePath) return;
+
+    shell.showItemInFolder(filePath);
 })
