@@ -23,7 +23,7 @@ function Omnibox() {
     }
 
     function handleOmniboxSearch(e) {
-        const value = e.target.value?.trim();
+        const value = e.target.value;
 
         dispatch(updateTabUrl({ tabId: activeTabId, tabUrl: value }));
         setOmniboxUrl(value)
