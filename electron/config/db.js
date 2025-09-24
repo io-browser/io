@@ -26,7 +26,18 @@ export async function connect() {
                     favicon TEXT default '',
                     createdAt DATETIME default CURRENT_TIMESTAMP
                 )
-            `)
+            `);
+
+        db.run(`
+                CREATE TABLE IF NOT EXISTS downloads (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    downloadItemName TEXT NOT NULL,
+                    downloadLink TEXT NOT NULL,
+                    savedPath TEXT NOT NULL,
+                    icon TEXT NOT NULL,
+                    createdAt DATETIME default CURRENT_TIMESTAMP
+                )
+            `);
 
         console.log(`database connected`)
         return db;

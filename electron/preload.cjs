@@ -12,6 +12,9 @@ contextBridge.exposeInMainWorld('electron', {
     goForward: () => ipcRenderer.send(`go-forward`),
     updateTabUrl: ({ tabId, url }) => ipcRenderer.send(`update-tab-url`, { tabId, url }),
     getHistory: ({ page, limit }) => ipcRenderer.invoke(`get-history:db`, { page, limit }),
+    getDownloads: ({ page, limit }) => ipcRenderer.invoke(`get-downloads:db`, { page, limit }),
+    deleteDownloadItem: ({ id }) => ipcRenderer.send(`delete-download-item:db`, { id }),
+    openInFileManager: ({ filePath }) => ipcRenderer.send(`open-in-file-manager`, { filePath }),
 
     onTabCreated: (callback) => ipcRenderer.on(`tab-created`, callback),
     onTabTitleUpdated: (callback) => ipcRenderer.on(`tab-title-updated`, callback),
