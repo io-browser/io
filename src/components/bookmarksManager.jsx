@@ -86,14 +86,14 @@ export default function BookmarksManager() {
             onScroll={handleScroll}
         >
             {bookmarks &&
-                bookmarks.map((h, index) =>
-                    h ? (
+                bookmarks.map((bookmark, index) =>
+                    bookmark ? (
                         <div
                             className="hover:bg-shark-800 rounded max-w-ms w-xl mx-auto flex items-center justify-stretch gap-2 group"
-                            key={h[0]}
+                            key={bookmark[0]}
                         >
                             <img
-                                src={h[1]}
+                                src={bookmark[1]}
                                 alt="favicon"
                                 className="rounded size-4 mx-2"
                             />
@@ -102,20 +102,20 @@ export default function BookmarksManager() {
                                 <input
                                     type="text"
                                     className="text-xs flex-grow p-2 bg-shark-600 border"
-                                    value={editedName ?? h[2]}
+                                    value={editedName ?? bookmark[2]}
                                     onChange={handleEditNameChange}
-                                    onKeyDown={(e) => handleKeyDown(e, index, h[0])}
+                                    onKeyDown={(e) => handleKeyDown(e, index, bookmark[0])}
                                 />
                             ) : (
                                 <div className="text-xs truncate flex-grow p-2">
-                                    {h[2]}
+                                    {bookmark[2]}
                                 </div>
                             )}
 
                             <a
-                                href={h[3]}
+                                href={bookmark[3]}
                                 className="p-2 cursor-pointer hover:bg-shark-500"
-                                title={h[3]}
+                                title={bookmark[3]}
                                 target="_blank"
                             >
                                 <ArrowTopRightOnSquareIcon className="size-4 text-shark-100" />
@@ -146,7 +146,7 @@ export default function BookmarksManager() {
                                                 <button
                                                     className="w-full text-left p-2 hover:bg-shark-900"
                                                     onClick={() =>
-                                                        handleRemoveBookmarkFromHistory(h[0])
+                                                        handleRemoveBookmarkFromHistory(bookmark[0])
                                                     }
                                                 >
                                                     Delete

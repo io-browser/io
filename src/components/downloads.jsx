@@ -51,13 +51,13 @@ export default function Downloads() {
 
     return (
         <div className="bg-shark-950 text-shark-50 h-screen flex flex-col gap-1 p-1 overflow-auto w-9xl" ref={containerReference} onScroll={handleScroll}>
-            {downloads && downloads.map(h =>
-                h && (<div className="hover:bg-shark-800 p-4 rounded max-w-ms w-xl mx-auto flex items-center justify-stretch gap-2 group" key={h[0]}>
-                    <img src={h[4]} alt={h[1]} className="rounded size-8" />
-                    <a className="text-sm truncate max-w-sm grow-1" href={h[2]}>{h[1]}</a>
-                    <button className="text-xs truncate max-w-sm ml-4 opacity-0 group-hover:opacity-100 cursor-pointer" title="copy download link" onClick={() => handleCopy(h[2])}>{isCopied ? <ClipboardDocumentCheckIcon className="size-4" /> : <ClipboardIcon className="size-4" />}</button>
-                    <button className="text-xs truncate max-w-sm ml-4 opacity-0 group-hover:opacity-100 cursor-pointer" title='open in file manager' onClick={() => handleOpenInFileManager(h[3])}><ArrowTopRightOnSquareIcon className="size-4" /></button>
-                    <button className="text-xs truncate max-w-sm ml-4 opacity-0 group-hover:opacity-100 cursor-pointer" title="remove from history" onClick={() => handleRemoveDownloadFromHistory(h[0])}><XMarkIcon className="size-4" /></button>
+            {downloads && downloads.map(downloadItem =>
+                downloadItem && (<div className="hover:bg-shark-800 p-4 rounded max-w-ms w-xl mx-auto flex items-center justify-stretch gap-2 group" key={downloadItem[0]}>
+                    <img src={downloadItem[4]} alt={downloadItem[1]} className="rounded size-8" />
+                    <a className="text-sm truncate max-w-sm grow-1" href={downloadItem[2]}>{downloadItem[1]}</a>
+                    <button className="text-xs truncate max-w-sm ml-4 opacity-0 group-hover:opacity-100 cursor-pointer" title="copy download link" onClick={() => handleCopy(downloadItem[2])}>{isCopied ? <ClipboardDocumentCheckIcon className="size-4" /> : <ClipboardIcon className="size-4" />}</button>
+                    <button className="text-xs truncate max-w-sm ml-4 opacity-0 group-hover:opacity-100 cursor-pointer" title='open in file manager' onClick={() => handleOpenInFileManager(downloadItem[3])}><ArrowTopRightOnSquareIcon className="size-4" /></button>
+                    <button className="text-xs truncate max-w-sm ml-4 opacity-0 group-hover:opacity-100 cursor-pointer" title="remove from history" onClick={() => handleRemoveDownloadFromHistory(downloadItem[0])}><XMarkIcon className="size-4" /></button>
                 </div>)
             )}
         </div>

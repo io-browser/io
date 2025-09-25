@@ -76,7 +76,7 @@ export default function MenuBar() {
                 <li><button className="hover:bg-shark-900 cursor-pointer rounded w-full text-left p-2 flex items-center justify-between" onClick={handleBookmarks}><span className="flex items-center gap-1"><BookOpenIcon className="size-4 mx-1" />Bookmarks</span><span className="bg-shark-700 p-1 rounded text-[8px]">Ctr + Shift + O</span></button></li>
                 <hr className="text-shark-800" />
                 <li><button className="hover:bg-shark-900 cursor-pointer rounded w-full text-left p-2 flex items-center justify-between" onClick={handleDevTools}><span className="flex items-center gap-1"><CommandLineIcon className="size-4 mx-1" />Dev Tools</span><span className="bg-shark-700 p-1 rounded text-[8px]">Ctr + Shift + I</span></button></li>
-                <li><button className="hover:bg-shark-900 cursor-pointer rounded w-full text-left p-2 flex items-center justify-between" /**TODO: call handleSettings */><span className="flex items-center gap-1"><Cog8ToothIcon className="size-4 mx-1" />Settings</span></button></li>
+                {/* TODO: add settings <li><button className="hover:bg-shark-900 cursor-pointer rounded w-full text-left p-2 flex items-center justify-between"><span className="flex items-center gap-1"><Cog8ToothIcon className="size-4 mx-1" />Settings</span></button></li> */}
                 <li><button className="hover:bg-shark-900 cursor-pointer rounded w-full text-left p-2 flex items-center justify-between" onClick={handleExist}><span className="flex items-center gap-1"><XMarkIcon className="size-4 mx-1" />Exist</span></button></li>
             </ul>
         </div>

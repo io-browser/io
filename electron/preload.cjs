@@ -34,4 +34,15 @@ contextBridge.exposeInMainWorld('electron', {
     onTabSwitched: (callback) => ipcRenderer.on(`tab-switched`, callback),
     onTabBookmarked: (callback) => ipcRenderer.on(`tab-bookmarked`, callback),
     onRemoveBookmarked: (callback) => ipcRenderer.on(`remove-bookmarked`, callback),
+
+    offTabCreated: (callback) => ipcRenderer.removeListener(`tab-created`, callback),
+    offTabClosed: (callback) => ipcRenderer.removeListener(`tab-closed`, callback),
+    offTabTitleUpdated: (callback) => ipcRenderer.removeListener(`tab-title-updated`, callback),
+    offTabUrlUpdated: (callback) => ipcRenderer.removeListener('tab-url-updated', callback),
+    offTabLoadingStart: (callback) => ipcRenderer.removeListener('tab-loading-start', callback),
+    offTabLoadingStop: (callback) => ipcRenderer.removeListener('tab-loading-stop', callback),
+    offTabFaviconUpdated: (callback) => ipcRenderer.removeListener('tab-favicon-updated', callback),
+    offTabSwitched: (callback) => ipcRenderer.removeListener(`tab-switched`, callback),
+    offTabBookmarked: (callback) => ipcRenderer.removeListener(`tab-bookmarked`, callback),
+    offRemoveBookmarked: (callback) => ipcRenderer.removeListener(`remove-bookmarked`, callback),
 })

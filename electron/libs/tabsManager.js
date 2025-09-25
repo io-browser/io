@@ -52,14 +52,6 @@ export default class TabsManager {
         this.mainWindow.contentView.addChildView(view)
         view.webContents.loadURL(url);
         view.setBounds({ x: 0, y: this.uiHieght, width: this.mainWindow.getBounds().width - this.uiWidth, height: this.mainWindow.getBounds().height - this.uiHieght });
-
-        // this.mainWindow.webContents.send('tab-created', {
-        //     tabId,
-        //     isActive: true,
-        //     favicon: null,
-        //     title: 'New Tab',
-        //     url,
-        // });
     }
 
     closeTab(tabId) {
