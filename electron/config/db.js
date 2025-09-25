@@ -39,6 +39,16 @@ export async function connect() {
                 )
             `);
 
+        db.run(`
+                CREATE TABLE IF NOT EXISTS bookmarks (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    favicon TEXT NOT NULL,
+                    name TEXT NOT NULL,
+                    url TEXT NOT NULL,
+                    createdAt DATETIME default CURRENT_TIMESTAMP
+                )
+            `);
+
         console.log(`database connected`)
         return db;
     } catch (error) {

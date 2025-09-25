@@ -13,7 +13,13 @@ contextBridge.exposeInMainWorld('electron', {
     updateTabUrl: ({ tabId, url }) => ipcRenderer.send(`update-tab-url`, { tabId, url }),
     getHistory: ({ page, limit }) => ipcRenderer.invoke(`get-history:db`, { page, limit }),
     getDownloads: ({ page, limit }) => ipcRenderer.invoke(`get-downloads:db`, { page, limit }),
-    deleteDownloadItem: ({ id }) => ipcRenderer.send(`delete-download-item:db`, { id }),
+    getBookmarks: ({ page, limit }) => ipcRenderer.invoke(`get-bookmarks:db`, { page, limit }),
+    deleteDownloadItem: ({ id }) => ipcRenderer.invoke(`delete-download-item:db`, { id }),
+    bookmarkActiveTab: () => ipcRenderer.invoke(`bookmark-active-tab:db`),
+    deleteBookmarkActiveTab: () => ipcRenderer.invoke(`delete-bookmark-active-tab:db`),
+    deleteBookmark: ({ id }) => ipcRenderer.invoke(`delete-bookmark:db`, { id }),
+    updateBookmarkName: ({ id, name }) => ipcRenderer.invoke(`update-bookmark-name:db`, { id, name }),
+    bookmarkUrlExist: ({ url }) => ipcRenderer.invoke(`bookmark-url-exist:db`, { url }),
     openInFileManager: ({ filePath }) => ipcRenderer.send(`open-in-file-manager`, { filePath }),
 
     onTabCreated: (callback) => ipcRenderer.on(`tab-created`, callback),
@@ -24,4 +30,6 @@ contextBridge.exposeInMainWorld('electron', {
     onTabLoadingStop: (callback) => ipcRenderer.on('tab-loading-stop', callback),
     onTabFaviconUpdated: (callback) => ipcRenderer.on('tab-favicon-updated', callback),
     onTabSwitched: (callback) => ipcRenderer.on(`tab-switched`, callback),
+    onTabBookmarked: (callback) => ipcRenderer.on(`tab-bookmarked`, callback),
+    onRemoveBookmarked: (callback) => ipcRenderer.on(`remove-bookmarked`, callback),
 })

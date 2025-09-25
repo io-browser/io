@@ -1,6 +1,7 @@
 import { useSelector, useDispatch } from "react-redux";
 import { updateTabUrl } from "../slices/tabs/tabSlice";
 import { ArrowLeftIcon, ArrowRightIcon, ArrowPathRoundedSquareIcon, Bars3Icon, StarIcon, ChevronDownIcon, BookmarkIcon, XMarkIcon } from "@heroicons/react/24/solid"
+import { BookmarkIcon as UnbookmarkIcon } from "@heroicons/react/24/outline";
 import { useEffect, useState } from "react";
 
 function Omnibox() {
@@ -8,13 +9,24 @@ function Omnibox() {
     const { tabs, activeTabId } = useSelector(state => state.tabs);
     const dispatch = useDispatch();
     const [omniboxUrl, setOmniboxUrl] = useState('');
+    const [isBookmarked, setIsBookmarked] = useState(false);
 
     useEffect(() => {
-        const activeTabIndex = tabs.findIndex(tab => tab.tabId == activeTabId);
-        const activeTab = tabs[activeTabIndex];
+        const fetchBookmarkStatus = async () => {
+            const activeTabIndex = tabs.findIndex(tab => tab.tabId === activeTabId);
+            const activeTab = tabs[activeTabIndex];
 
-        if (!omniboxUrl.startsWith('io://')) setOmniboxUrl(activeTab.tabUrl);
-    }, [activeTabId, tabs])
+            if (!activeTab) return;
+
+            const isBookmarked = await window.electron.bookmarkUrlExist({ url: activeTab.tabUrl });
+            setIsBookmarked(isBookmarked);
+
+            if (!omniboxUrl.startsWith('io://')) setOmniboxUrl(activeTab.tabUrl);
+        };
+
+        fetchBookmarkStatus();
+    }, [activeTabId, tabs]);
+
 
     function handleOmniboxSearchKeyDown(e) {
         const value = e.target.value?.trim();
@@ -27,6 +39,16 @@ function Omnibox() {
 
         dispatch(updateTabUrl({ tabId: activeTabId, tabUrl: value }));
         setOmniboxUrl(value)
+    }
+
+    function handleToggleBookmark() {
+        if (isBookmarked) {
+            setIsBookmarked(false);
+            window.electron.deleteBookmarkActiveTab()
+        } else {
+            setIsBookmarked(true);
+            window.electron.bookmarkActiveTab()
+        }
     }
 
     return (
@@ -53,8 +75,8 @@ function Omnibox() {
                             <div className="h-full flex-1 text-[14px] flex items-center">
                                 <input type="text" value={omniboxUrl} onChange={handleOmniboxSearch} onKeyDown={handleOmniboxSearchKeyDown} placeholder="Search..." className="border-none focus:outline-none w-full" />
                             </div>
-                            <div className="cursor-pointer flex items-center justify-baseline px-1 gap-4">
-                                <BookmarkIcon className="w-4 h-4" />
+                            <div className="cursor-pointer flex items-center justify-baseline px-1 gap-4" onClick={handleToggleBookmark}>
+                                {isBookmarked ? <BookmarkIcon className="w-4 h-4" /> : <UnbookmarkIcon className="w-4 h-4" />}
                             </div>
                         </div>
                     </div>
