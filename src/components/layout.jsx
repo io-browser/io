@@ -1,6 +1,7 @@
 import Tabs from "./tabs";
 import Omnibox from "./omnibox";
 import Bookmarks from "./bookmarks";
+import MenuBar from './menubar';
 
 export default function Layout() {
 
@@ -9,6 +10,7 @@ export default function Layout() {
             <Tabs />
             <Omnibox />
             <Bookmarks />
+            <MenuBar />
         </div>
     )
 }

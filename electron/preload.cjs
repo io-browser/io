@@ -21,6 +21,8 @@ contextBridge.exposeInMainWorld('electron', {
     updateBookmarkName: ({ id, name }) => ipcRenderer.invoke(`update-bookmark-name:db`, { id, name }),
     bookmarkUrlExist: ({ url }) => ipcRenderer.invoke(`bookmark-url-exist:db`, { url }),
     openInFileManager: ({ filePath }) => ipcRenderer.send(`open-in-file-manager`, { filePath }),
+    toggleMenuBar: () => ipcRenderer.send(`toggle-menu-bar`),
+    openDevTools: () => ipcRenderer.send(`open-dev-tools`),
 
     onTabCreated: (callback) => ipcRenderer.on(`tab-created`, callback),
     onTabClosed: (callback) => ipcRenderer.on(`tab-closed`, callback),

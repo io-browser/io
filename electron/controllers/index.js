@@ -17,6 +17,8 @@ import updateBookmarkNameDb from "./updateBookmarkName.db.js";
 import bookmarkUrlExistDb from "./bookmarkUrlExist.db.js";
 import bookmarkActiveTabDb from "./bookmarkActiveTab.db.js";
 import deleteBookmarkFromActiveTabDb from "./deleteBookmarkFromActiveTab.db.js";
+import toggleMenuBar from "./toggleMenuBar.js";
+import openDevTools from "./openDevTools.js";
 
 export default (mainWindow, TabsClient, db) => {
     ipcMain.on(`window-control`, windowControl(mainWindow))
@@ -53,5 +55,9 @@ export default (mainWindow, TabsClient, db) => {
 
     ipcMain.handle(`bookmark-url-exist:db`, bookmarkUrlExistDb(db));
 
-    ipcMain.on(`open-in-file-manager`, openInFileManager())
+    ipcMain.on(`open-in-file-manager`, openInFileManager());
+
+    ipcMain.on(`toggle-menu-bar`, toggleMenuBar(TabsClient));
+
+    ipcMain.on(`open-dev-tools`, openDevTools(TabsClient));
 }
