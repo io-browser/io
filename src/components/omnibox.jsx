@@ -51,6 +51,10 @@ function Omnibox() {
         }
     }
 
+    function handleMenuBarClick() {
+        window.electron.toggleMenuBar();
+    }
+
     return (
         <>
             <div className="bg-shark-800 text-shark-50 flex items-center px-1 justify-between w-full h-10">
@@ -82,7 +86,7 @@ function Omnibox() {
                     </div>
                 </div>
                 <div className="flex items-center px-2">
-                    <button className="h-full rounded cursor-pointer">
+                    <button className="h-full rounded cursor-pointer" onClick={handleMenuBarClick}>
                         <Bars3Icon className="w-6 h-6" />
                     </button>
                 </div>

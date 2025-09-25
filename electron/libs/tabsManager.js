@@ -17,6 +17,7 @@ export default class TabsManager {
         this.activeTabId = null;
         this.tabs = new Map();
         this.uiHieght = 112; // 112px
+        this.uiWidth = 0; // 0 px
 
         this.setupResizeHandling();
     }
@@ -50,7 +51,7 @@ export default class TabsManager {
         this.activeTabId = tabId;
         this.mainWindow.contentView.addChildView(view)
         view.webContents.loadURL(url);
-        view.setBounds({ x: 0, y: this.uiHieght, width: this.mainWindow.getBounds().width, height: this.mainWindow.getBounds().height - this.uiHieght });
+        view.setBounds({ x: 0, y: this.uiHieght, width: this.mainWindow.getBounds().width - this.uiWidth, height: this.mainWindow.getBounds().height - this.uiHieght });
 
         // this.mainWindow.webContents.send('tab-created', {
         //     tabId,
@@ -291,6 +292,18 @@ export default class TabsManager {
         tab.view.webContents.navigationHistory.goForward()
     }
 
+    openDevTools() {
+
+        const tab = this.tabs.get(this.activeTabId);
+
+        if (!tab) {
+            console.error(`No active tab found`);
+            return false;
+        }
+
+        tab.view.webContents.openDevTools()
+    }
+
     toggleDevTools() {
 
         const tab = this.tabs.get(this.activeTabId);
@@ -336,6 +349,16 @@ export default class TabsManager {
         this.mainWindow.webContents.send(`remove-bookmarked`, { id: id })
     }
 
+    toggleMenuBar() {
+        if (this.uiWidth) {
+            this.uiWidth = 0;
+            this.updateActiveTabBounds();
+        } else {
+            this.uiWidth = 260;
+            this.updateActiveTabBounds();
+        }
+    }
+
     setupResizeHandling() {
         // Handle resize events
         this.mainWindow.on('resize', () => {
@@ -371,7 +394,7 @@ export default class TabsManager {
         const newBounds = {
             x: 0,
             y: this.uiHieght,
-            width: windowBounds.width,
+            width: windowBounds.width - this.uiWidth,
             height: windowBounds.height - this.uiHieght
         };
 
