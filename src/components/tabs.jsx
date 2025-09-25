@@ -12,39 +12,57 @@ function Tabs() {
 
     useEffect(() => {
 
-        window.electron.createNewTab({ tabId: tabs[tabs.length - 1].tabId });
 
-        window.electron.onTabCreated((_, { tabId, isActive, favicon, title, url }) => {
+        const handleOnTabCreate = (_, { tabId, isActive, favicon, title, url }) => {
             dispatch(createTab({ tabId, tabFavicon: favicon, tabTitle: title, tabUrl: url }));
             window.electron.createNewTab({ tabId, url });
             dispatch(switchTab({ tabId }))
-        })
+        }
 
-        window.electron.onTabClosed((_, { tabId }) => {
+        const handleOnTabClose = (_, { tabId }) => {
             dispatch(deleteTab({ tabId }));
             window.electron.closeTab({ tabId });
-        })
+        }
 
-        window.electron.onTabTitleUpdated((_, { tabId, title }) => {
+        const handleOnTabTitleUpdated = (_, { tabId, title }) => {
             dispatch(updateTabTitle({ tabId, tabTitle: title }))
-        });
+        }
 
-        window.electron.onTabFaviconUpdated((_, { tabId, favicon }) => {
+        const handleOnTabFaviconUpdated = (_, { tabId, favicon }) => {
             dispatch(updateTabFavicon({ tabId, tabFavicon: favicon }))
-        });
+        }
 
-        window.electron.onTabUrlUpdated((_, { tabId, url }) => {
+        const handleOnUrlUpdated = (_, { tabId, url }) => {
             dispatch(updateTabUrl({ tabId, tabUrl: url }))
-        });
+        }
 
-        window.electron.onTabLoadingStart((_, { tabId }) => {
+        const handleOnTabLoadingStart = (_, { tabId }) => {
             dispatch(updateTabLoadingState({ tabId, isLoading: true }))
-        });
+        }
 
-        window.electron.onTabLoadingStop((_, { tabId }) => {
+        const handleOnTabLoadingStop = (_, { tabId }) => {
 
             dispatch(updateTabLoadingState({ tabId, isLoading: false }))
-        });
+        }
+
+        window.electron.createNewTab({ tabId: tabs[tabs.length - 1].tabId });
+        window.electron.onTabCreated(handleOnTabCreate)
+        window.electron.onTabClosed(handleOnTabClose)
+        window.electron.onTabTitleUpdated(handleOnTabTitleUpdated);
+        window.electron.onTabFaviconUpdated(handleOnTabFaviconUpdated);
+        window.electron.onTabUrlUpdated(handleOnUrlUpdated);
+        window.electron.onTabLoadingStart(handleOnTabLoadingStart);
+        window.electron.onTabLoadingStop(handleOnTabLoadingStop);
+
+        return () => {
+            window.electron.offTabCreated(handleOnTabCreate)
+            window.electron.offTabClosed(handleOnTabClose)
+            window.electron.offTabTitleUpdated(handleOnTabTitleUpdated);
+            window.electron.offTabFaviconUpdated(handleOnTabFaviconUpdated);
+            window.electron.offTabUrlUpdated(handleOnUrlUpdated);
+            window.electron.offTabLoadingStart(handleOnTabLoadingStart);
+            window.electron.offTabLoadingStop(handleOnTabLoadingStop);
+        }
     }, [])
 
     const handleCreateTab = () => {

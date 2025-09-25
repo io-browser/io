@@ -10,13 +10,21 @@ function Bookmarks() {
 
         loadBookmarks();
 
-        window.electron.onTabBookmarked((_, { id, favicon, name, url }) => {
+        const handleOnTabBookmarked = (_, { id, favicon, name, url }) => {
             setBookmarks(prev => [...prev, [id, favicon, name, url, Date.now()]])
-        })
+        }
 
-        window.electron.onRemoveBookmarked((_, { id }) => {
+        const handleOnRemoveBookmarked = (_, { id }) => {
             setBookmarks(prev => prev.filter(bookmark => bookmark[0] !== id))
-        })
+        }
+
+        window.electron.onTabBookmarked(handleOnTabBookmarked)
+        window.electron.onRemoveBookmarked(handleOnRemoveBookmarked)
+
+        return () => {
+            window.electron.offTabBookmarked(handleOnTabBookmarked)
+            window.electron.offRemoveBookmarked(handleOnRemoveBookmarked)
+        }
     }, [])
 
     async function loadBookmarks() {
