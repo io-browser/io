@@ -8,7 +8,19 @@ export default (mainWindow, TabsClient) => {
 
     // TODO: CMD/CTR + B - Toggle Manu Bar
 
-    // TODO: CMD/CTR + D - Bookmark Page
+    // CMD/CTR + D - Bookmark Page
+    menu.append(new MenuItem({
+        accelerator: `${CTR}+D`,
+        click: () => {
+            if (!TabsClient.activeTabId) return;
+            const tab = TabsClient.tabs.get(TabsClient.activeTabId);
+
+            if (!tab) return;
+
+            TabsClient.bookmarkActiveTab();
+        },
+        label: 'Bookmark Active Tab'
+    }));
 
     // CMD/CTR + H - Open History Page
     menu.append(new MenuItem({
@@ -94,7 +106,19 @@ export default (mainWindow, TabsClient) => {
         label: 'Toggle Dev Tools'
     }));
 
-    // TODO: CMD/CTR + Shift + O - Open Bookmarks Page
+    // CMD/CTR + Shift + O - Open Bookmarks Page
+    menu.append(new MenuItem({
+        accelerator: `${CPShift}+O`,
+        click: () => {
+            if (!TabsClient.activeTabId) return;
+            const tab = TabsClient.tabs.get(TabsClient.activeTabId);
+
+            if (!tab) return;
+
+            TabsClient.updateTabUrl(TabsClient.activeTabId, `io://bookmarks`)
+        },
+        label: 'Open Bookmarks Manager Page'
+    }));
 
     Menu.setApplicationMenu(menu);
 }

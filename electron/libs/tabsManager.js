@@ -4,6 +4,7 @@ import path from "path";
 import { fileURLToPath } from "url"
 import { isValidUrl } from "../utils/index.js";
 import HistoryManager from "./historyManager.js";
+import db, { saveDb } from "../config/db.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -15,7 +16,7 @@ export default class TabsManager {
         this.mainWindow = mainWindow;
         this.activeTabId = null;
         this.tabs = new Map();
-        this.uiHieght = 80; // 80px
+        this.uiHieght = 112; // 112px
 
         this.setupResizeHandling();
     }
@@ -49,7 +50,7 @@ export default class TabsManager {
         this.activeTabId = tabId;
         this.mainWindow.contentView.addChildView(view)
         view.webContents.loadURL(url);
-        view.setBounds({ x: 0, y: 80, width: this.mainWindow.getBounds().width, height: this.mainWindow.getBounds().height - 80 });
+        view.setBounds({ x: 0, y: this.uiHieght, width: this.mainWindow.getBounds().width, height: this.mainWindow.getBounds().height - this.uiHieght });
 
         // this.mainWindow.webContents.send('tab-created', {
         //     tabId,
@@ -300,6 +301,39 @@ export default class TabsManager {
         }
 
         tab.view.webContents.toggleDevTools()
+    }
+
+    bookmarkActiveTab() {
+
+        const tab = this.tabs.get(this.activeTabId);
+
+        if (!tab) {
+            console.error(`No active tab found`);
+            return false;
+        }
+
+        db()?.run(`INSERT INTO bookmarks (favicon, name, url) VALUES (?, ?, ?)`, [tab.favicon, tab.title, tab.url]);
+        saveDb(db());
+
+        const [{ values: [[id]] }] = db().exec("SELECT MAX(id) FROM bookmarks");
+
+        this.mainWindow.webContents.send(`tab-bookmarked`, { id: id, favicon: tab.favicon, name: tab.title, url: tab.url })
+    }
+
+    removeBookmarkForActiveTab() {
+
+        const tab = this.tabs.get(this.activeTabId);
+        if (!tab) {
+            console.error(`No active tab found`);
+            return false;
+        }
+
+        const [{ values: [[id]] }] = db().exec("SELECT MAX(id) FROM bookmarks");
+
+        db()?.run(`DELETE FROM bookmarks WHERE url = ?`, [tab.url]);
+        saveDb(db())
+
+        this.mainWindow.webContents.send(`remove-bookmarked`, { id: id })
     }
 
     setupResizeHandling() {

@@ -1,4 +1,4 @@
-import { ipcMain, shell } from "electron";
+import { ipcMain } from "electron";
 import windowControl from "./windowControl.js";
 import createNewTab from "./createNewTab.js";
 import closeTab from "./closeTab.js";
@@ -11,6 +11,12 @@ import getHistoryDb from "./getHistory.db.js";
 import getDownloadsDb from "./getDownloads.db.js";
 import deleteDownloadItemDb from "./deleteDownloadItem.db.js";
 import openInFileManager from "./openInFileManager.js";
+import getBookmarksDb from "./getBookmarks.db.js";
+import deleteBookmarkDb from "./deleteBookmark.db.js";
+import updateBookmarkNameDb from "./updateBookmarkName.db.js";
+import bookmarkUrlExistDb from "./bookmarkUrlExist.db.js";
+import bookmarkActiveTabDb from "./bookmarkActiveTab.db.js";
+import deleteBookmarkFromActiveTabDb from "./deleteBookmarkFromActiveTab.db.js";
 
 export default (mainWindow, TabsClient, db) => {
     ipcMain.on(`window-control`, windowControl(mainWindow))
@@ -34,6 +40,18 @@ export default (mainWindow, TabsClient, db) => {
     ipcMain.handle(`get-downloads:db`, getDownloadsDb(db));
 
     ipcMain.on(`delete-download-item:db`, deleteDownloadItemDb(db));
+
+    ipcMain.handle(`bookmark-active-tab:db`, bookmarkActiveTabDb(TabsClient));
+
+    ipcMain.handle(`delete-bookmark-active-tab:db`, deleteBookmarkFromActiveTabDb(TabsClient));
+
+    ipcMain.handle(`get-bookmarks:db`, getBookmarksDb(db));
+
+    ipcMain.handle(`delete-bookmark:db`, deleteBookmarkDb(mainWindow, db));
+
+    ipcMain.handle(`update-bookmark-name:db`, updateBookmarkNameDb(db));
+
+    ipcMain.handle(`bookmark-url-exist:db`, bookmarkUrlExistDb(db));
 
     ipcMain.on(`open-in-file-manager`, openInFileManager())
 }
