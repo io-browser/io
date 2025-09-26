@@ -4,4 +4,5 @@
 
 ### Patch Changes
 
-- changeset configure
+chore/changeset
+- configure changeset
