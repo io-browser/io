@@ -64,7 +64,11 @@ jobs:
 
       - name: Find Windows build
         id: win
-        run: echo "FILE=$(find dist-all/electron-build-windows-latest -name '*.exe')" >> $GITHUB_OUTPUT
+        run: |
+          FILE=$(find dist-all/electron-build-windows-latest -name '*.exe')
+          echo "FILE<<EOF" >> $GITHUB_OUTPUT
+          echo "$FILE" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
 
       - name: Upload Windows build
         uses: actions/upload-release-asset@v1
@@ -76,7 +80,11 @@ jobs:
 
       - name: Find Mac build
         id: mac
-        run: echo "FILE=$(find dist-all/electron-build-macos-latest -name '*.dmg')" >> $GITHUB_OUTPUT
+        run: |
+          FILE=$(find dist-all/electron-build-macos-latest -name '*.dmg')
+          echo "FILE<<EOF" >> $GITHUB_OUTPUT
+          echo "$FILE" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
 
       - name: Upload Mac build
         uses: actions/upload-release-asset@v1
@@ -88,7 +96,11 @@ jobs:
 
       - name: Find Linux build
         id: linux
-        run: echo "FILE=$(find dist-all/electron-build-ubuntu-latest -name '*.AppImage')" >> $GITHUB_OUTPUT
+        run: |
+          FILE=$(find dist-all/electron-build-ubuntu-latest -name '*.AppImage')
+          echo "FILE<<EOF" >> $GITHUB_OUTPUT
+          echo "$FILE" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
 
       - name: Upload Linux build
         uses: actions/upload-release-asset@v1
