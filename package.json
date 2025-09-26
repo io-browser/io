@@ -1,7 +1,7 @@
 {
   "name": "io",
   "private": true,
-  "version": "0.0.0",
+  "version": "1.0.0",
   "type": "module",
   "main": "electron/app.js",
   "scripts": {
@@ -10,6 +10,7 @@
     "dev:tailwind": "tailwindcss -i ./src/index.css -o ./dist/assets/output.css -w",
     "dev:electron": "electron .",
     "build": "vite build",
+    "build:electron": "electron-builder",
     "lint": "eslint .",
     "preview": "vite preview"
   },
@@ -31,6 +32,8 @@
     "@vitejs/plugin-react": "^5.0.0",
     "concurrently": "^9.2.1",
     "electron": "^37.4.0",
+    "electron-builder": "^26.0.12",
+    "electron-icon-builder": "^2.0.1",
     "eslint": "^9.33.0",
     "eslint-plugin-react-hooks": "^5.2.0",
     "eslint-plugin-react-refresh": "^0.4.20",

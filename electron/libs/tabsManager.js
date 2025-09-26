@@ -1,4 +1,4 @@
-import { WebContentsView } from "electron";
+import { app, WebContentsView } from "electron";
 import { nanoid } from "@reduxjs/toolkit";
 import path from "path";
 import { fileURLToPath } from "url"
@@ -258,7 +258,7 @@ export default class TabsManager {
         const isValid = isValidUrl(url)
 
         if (isValid && (isValid.protocol === "http:" || isValid.protocol === "https:")) tab.view.webContents.loadURL(url);
-        else if (isValid && isValid.protocol === "io:") tab.view.webContents.loadURL(`http://localhost:5173/#/${isValid.host}`)
+        else if (isValid && isValid.protocol === "io:") tab.view.webContents.loadURL(!app.isPackaged ? `http://localhost:5173/#/${isValid.host}` : `file://${path.join(__dirname, `../dist/index.html#/${isValid.host}`)}`)
         else tab.view.webContents.loadURL(`https://startpage.com/sp/search?query=${url}`)
     }
 

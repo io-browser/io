@@ -1,0 +1,29 @@
+{
+  "appId": "com.browser.io",
+  "productName": "io",
+  "directories": {
+    "output": "dist-electron"
+  },
+  "files": [
+    "electron/**/*",
+    "package.json",
+    "dist/**/*"
+  ],
+  "mac": {
+    "target": "dmg",
+    "category": "public.app-category.utilities",
+    "icon": "public/icons/mac/icon.icns"
+  },
+  "win": {
+    "target": "nsis",
+    "icon": "public/icons/win/icon.ico"
+  },
+  "linux": {
+    "target": [
+      "AppImage",
+      "deb"
+    ],
+    "category": "Utility",
+    "icon": "public/icons/png/1024x1024.png"
+  }
+}

@@ -26,7 +26,7 @@ export async function createWindow() {
         frame: false
     });
 
-    const startUrl = !app.isPackaged ? 'http://localhost:5173' : `file://${__dirname, '/dist-react/index.html'}`;
+    const startUrl = !app.isPackaged ? 'http://localhost:5173' : `file://${path.join(__dirname, '../dist/index.html#')}`;
 
     mainWindow.loadURL(startUrl);
 
