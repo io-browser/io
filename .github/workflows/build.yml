@@ -1,14 +1,14 @@
-name: Build/release
+name: Build & Release io
 
 on:
   push:
-    tags:
-      - 'v*.*.*'
+    branches:
+      - main
 
 jobs:
-  release:
+  build:
+    name: Build ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
-
     strategy:
       matrix:
         os: [macos-latest, ubuntu-latest, windows-latest]
@@ -20,17 +20,73 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: 22
+          node-version: 20
 
       - name: Install dependencies
         run: npm ci
 
-      - name: Build frontend
+      - name: Build React app
         run: npm run build
 
-      - name: Build/release Electron app
-        uses: samuelmeuli/action-electron-builder@v1
+      - name: Build Electron app
+        run: npm run build:electron
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v3
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          release: true
-          skip_build: true
+          name: electron-build-${{ matrix.os }}
+          path: dist-electron/
+
+  release:
+    name: Create Release
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Download artifacts
+        uses: actions/download-artifact@v3
+        with:
+          path: dist-all
+
+      - name: Create Release
+        id: create_release
+        uses: ncipollo/release-action@v1
+        with:
+          tag: v${{ github.run_number }}
+          name: Release v${{ github.run_number }}
+          draft: false
+          prerelease: false
+
+      - name: Upload Windows build
+        uses: actions/upload-release-asset@v1
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: dist-all/electron-build-windows-latest/*.exe
+          asset_name: io-windows.exe
+          asset_content_type: application/octet-stream
+
+      - name: Upload Mac build
+        uses: actions/upload-release-asset@v1
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: dist-all/electron-build-macos-latest/*.dmg
+          asset_name: io-mac.dmg
+          asset_content_type: application/octet-stream
+
+      - name: Upload Linux build
+        uses: actions/upload-release-asset@v1
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: dist-all/electron-build-ubuntu-latest/*.AppImage
+          asset_name: io-linux.AppImage
+          asset_content_type: application/octet-stream
+
+      - name: Generate download-links.json
+        run: |
+          echo '{
+            "windows": "https://github.com/io-browser/io/releases/latest/download/io-windows.exe",
+            "mac": "https://github.com/io-browser/io/releases/latest/download/io-mac.dmg",
+            "linux": "https://github.com/io-browser/io/releases/latest/download/io-linux.AppImage"
+          }' > public/download-links.json
