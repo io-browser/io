@@ -1,9 +1,13 @@
 {
   "name": "io",
   "private": true,
-  "version": "1.0.0",
+  "version": "1.0.4",
   "type": "module",
   "main": "electron/app.js",
+  "author": {
+    "name": "Syed Ismail",
+    "email": "ismailbinmujeeb@gmail.com"
+  },
   "scripts": {
     "dev": "concurrently \"npm run dev:react\" \"npm run dev:tailwind\" \"npm run dev:electron\"",
     "dev:react": "vite",
