@@ -73,6 +73,8 @@ jobs:
 
       - name: Upload Windows build
         uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_PAT }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_path: ${{ steps.win.outputs.FILE }}
@@ -89,6 +91,8 @@ jobs:
 
       - name: Upload Mac build
         uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_PAT }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_path: ${{ steps.mac.outputs.FILE }}
@@ -105,6 +109,8 @@ jobs:
 
       - name: Upload Linux build
         uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_PAT }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_path: ${{ steps.linux.outputs.FILE }}
