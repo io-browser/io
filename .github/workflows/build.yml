@@ -61,6 +61,7 @@ jobs:
           name: Release v${{ github.run_number }}
           draft: false
           prerelease: false
+          token: ${{ secrets.GH_PAT }}
 
       - name: Find Windows build
         id: win
