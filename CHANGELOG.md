@@ -1,5 +1,11 @@
 # io
 
+## 1.1.1
+
+### Patch Changes
+
+- fix menu bar glitch for new tab
+
 ## 1.1.0
 
 ### Minor Changes

@@ -46,7 +46,7 @@ export default class TabsManager {
 
         this.initializeTabEventListeners(tabId)
 
-        // TODO: Add switchTab method call.
+        this.switchToTab(tabId);
 
         this.activeTabId = tabId;
         this.mainWindow.contentView.addChildView(view)
