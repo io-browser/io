@@ -95,15 +95,15 @@ function Tabs() {
 
 
     return (
-        <div className="bg-shark-950 text-shark-50 flex items-center justify-between w-full h-10">
+        <div className="bg-shark-950 text-shark-50 flex items-center justify-between w-full h-10" style={{ WebkitAppRegion: "drag" }}>
             <div className="flex flex-1 h-full overflow-x-auto p-1 scrollbar-none">
                 {tabs.map(tab => (
                     <div
                         key={tab.tabId}
-                        className={`flex items-center justify-between pl-2 mr-1 cursor-pointer rounded transition-colors group
+                        className={`flex items-center justify-between min-w-[160px] max-w-[200px] pl-2 mr-1 cursor-pointer rounded transition-colors group
                         ${activeTabId == tab.tabId ? 'bg-shark-800' : 'bg-shark-950'}`}
                         onClick={() => handleSwitch(tab.tabId)}
-                        style={{ minWidth: "160px", maxWidth: "200px" }}
+                        style={{ WebkitAppRegion: "no-drag" }}
                     >
                         <div className="flex items-center gap-1 overflow-hidden">
                             {tab.isLoading ?
@@ -126,10 +126,11 @@ function Tabs() {
             <button
                 className="flex items-center justify-center w-10 h-full text-shark-300 hover:bg-shark-800"
                 onClick={handleCreateTab}
+                style={{ WebkitAppRegion: "no-drag" }}
             >
                 <PlusIcon className="w-5 h-5" />
             </button>
-            <div className="w-24 h-full flex items-center justify-between">
+            <div className="w-24 h-full flex items-center justify-between" style={{ WebkitAppRegion: "no-drag" }}>
                 <button className="flex justify-center items-center h-full w-full text-shark-50 hover:bg-shark-800" onClick={() => window.electron.windowMinimize()}>
                     <MinusIcon className="w-4 h-4" />
                 </button>
