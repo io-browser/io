@@ -4,6 +4,7 @@ import { XMarkIcon, PlusIcon, MinusIcon } from "@heroicons/react/24/solid"
 import { Square2StackIcon } from "@heroicons/react/24/outline";
 import { useEffect } from "react";
 import { nanoid } from "@reduxjs/toolkit";
+import globe from "../assets/globe.png"
 
 function Tabs() {
     const { tabs, activeTabId } = useSelector(state => state.tabs);
@@ -81,7 +82,7 @@ function Tabs() {
         window.electron.closeTab({ tabId });
     };
 
-    function favicon({ src, alt = "favicon", fallback = "/default-favicon.png" }) {
+    function favicon({ src, alt = "favicon", fallback = `` }) {
         let finalSrc = fallback;
 
         if (src?.startsWith("http")) {
@@ -90,7 +91,7 @@ function Tabs() {
             finalSrc = `${encodeURIComponent(src)}`;
         }
 
-        return <img src={finalSrc} alt={alt} className="w-4 h-4" />;
+        return <img src={src ? finalSrc : globe} alt={alt} className="w-4 h-4" />;
     }
 
 
@@ -112,7 +113,7 @@ function Tabs() {
                                     role="status">
                                 </div>
                                 : favicon({ src: tab.tabFavicon, alt: 'favicon' })}
-                            <p className="truncate text-sm mx-1">{tab.tabTitle?.trim()}</p>
+                            <p className="truncate text-sm mx-1">{tab.tabTitle?.trim() || 'Error Connection'}</p>
                         </div>
                         <button
                             className="h-full px-1 opacity-0 group-hover:opacity-100 hover:bg-shark-600 rounded-tr rounded-br"
