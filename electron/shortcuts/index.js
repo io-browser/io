@@ -120,5 +120,14 @@ export default (mainWindow, TabsClient) => {
         label: 'Open Bookmarks Manager Page'
     }));
 
+    // CMD/CTR + Shift + B - Toggle Bookmarks Section
+    menu.append(new MenuItem({
+        accelerator: `${CPShift}+B`,
+        click: () => {
+            TabsClient.toggleBookmarksSection();
+        },
+        label: 'Open Bookmarks Manager Page'
+    }));
+
     Menu.setApplicationMenu(menu);
 }
