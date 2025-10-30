@@ -16,7 +16,7 @@ export default class TabsManager {
         this.mainWindow = mainWindow;
         this.activeTabId = null;
         this.tabs = new Map();
-        this.uiHieght = 112; // 112px
+        this.uiHieght = 80; // 80px
         this.uiWidth = 0; // 0 px
 
         this.setupResizeHandling();
@@ -347,6 +347,16 @@ export default class TabsManager {
             this.updateActiveTabBounds();
         } else {
             this.uiWidth = 260;
+            this.updateActiveTabBounds();
+        }
+    }
+
+    toggleBookmarksSection() {
+        if (this.uiHieght === 112) {
+            this.uiHieght -= 32;
+            this.updateActiveTabBounds();
+        } else {
+            this.uiHieght = 112;
             this.updateActiveTabBounds();
         }
     }
