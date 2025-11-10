@@ -32,7 +32,7 @@ export async function createWindow() {
 
   mainWindow.loadURL(startUrl);
 
-  mainWindow.webContents.openDevTools();
+  if (!app.isPackaged) mainWindow.webContents.openDevTools();
 
   mainWindow.once("ready-to-show", () => {
     mainWindow.show();
