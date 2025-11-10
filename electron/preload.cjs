@@ -1,48 +1,78 @@
-const { contextBridge, ipcRenderer } = require('electron');
+const { contextBridge, ipcRenderer } = require("electron");
 
-contextBridge.exposeInMainWorld('electron', {
-    windowMinimize: () => ipcRenderer.send(`window-control`, `minimize`),
-    windowMaximize: () => ipcRenderer.send(`window-control`, `maximize`),
-    windowClose: () => ipcRenderer.send(`window-control`, `close`),
-    createNewTab: ({ tabId, url }) => ipcRenderer.send(`create-new-tab`, { tabId, url }),
-    closeTab: ({ tabId }) => ipcRenderer.send(`close-tab`, `${tabId}`),
-    switchTab: ({ tabId }) => ipcRenderer.send(`switch-tab`, `${tabId}`),
-    reloadTab: ({ tabId }) => ipcRenderer.send(`reload-tab`, `${tabId}`),
-    goBack: () => ipcRenderer.send(`go-back`),
-    goForward: () => ipcRenderer.send(`go-forward`),
-    updateTabUrl: ({ tabId, url }) => ipcRenderer.send(`update-tab-url`, { tabId, url }),
-    getHistory: ({ page, limit }) => ipcRenderer.invoke(`get-history:db`, { page, limit }),
-    getDownloads: ({ page, limit }) => ipcRenderer.invoke(`get-downloads:db`, { page, limit }),
-    getBookmarks: ({ page, limit }) => ipcRenderer.invoke(`get-bookmarks:db`, { page, limit }),
-    deleteDownloadItem: ({ id }) => ipcRenderer.invoke(`delete-download-item:db`, { id }),
-    bookmarkActiveTab: () => ipcRenderer.invoke(`bookmark-active-tab:db`),
-    deleteBookmarkActiveTab: () => ipcRenderer.invoke(`delete-bookmark-active-tab:db`),
-    deleteBookmark: ({ id }) => ipcRenderer.invoke(`delete-bookmark:db`, { id }),
-    updateBookmarkName: ({ id, name }) => ipcRenderer.invoke(`update-bookmark-name:db`, { id, name }),
-    bookmarkUrlExist: ({ url }) => ipcRenderer.invoke(`bookmark-url-exist:db`, { url }),
-    openInFileManager: ({ filePath }) => ipcRenderer.send(`open-in-file-manager`, { filePath }),
-    toggleMenuBar: () => ipcRenderer.send(`toggle-menu-bar`),
-    openDevTools: () => ipcRenderer.send(`open-dev-tools`),
+contextBridge.exposeInMainWorld("electron", {
+  windowMinimize: () => ipcRenderer.send(`window-control`, `minimize`),
+  windowMaximize: () => ipcRenderer.send(`window-control`, `maximize`),
+  windowClose: () => ipcRenderer.send(`window-control`, `close`),
+  createNewTab: ({ tabId, url }) =>
+    ipcRenderer.send(`create-new-tab`, { tabId, url }),
+  closeTab: ({ tabId }) => ipcRenderer.send(`close-tab`, `${tabId}`),
+  switchTab: ({ tabId }) => ipcRenderer.send(`switch-tab`, `${tabId}`),
+  reloadTab: ({ tabId }) => ipcRenderer.send(`reload-tab`, `${tabId}`),
+  goBack: () => ipcRenderer.send(`go-back`),
+  goForward: () => ipcRenderer.send(`go-forward`),
+  updateTabUrl: ({ tabId, url }) =>
+    ipcRenderer.send(`update-tab-url`, { tabId, url }),
+  getHistory: ({ page, limit }) =>
+    ipcRenderer.invoke(`get-history:db`, { page, limit }),
+  getDownloads: ({ page, limit }) =>
+    ipcRenderer.invoke(`get-downloads:db`, { page, limit }),
+  getBookmarks: ({ page, limit }) =>
+    ipcRenderer.invoke(`get-bookmarks:db`, { page, limit }),
+  deleteDownloadItem: ({ id }) =>
+    ipcRenderer.invoke(`delete-download-item:db`, { id }),
+  bookmarkActiveTab: () => ipcRenderer.invoke(`bookmark-active-tab:db`),
+  deleteBookmarkActiveTab: () =>
+    ipcRenderer.invoke(`delete-bookmark-active-tab:db`),
+  deleteBookmark: ({ id }) => ipcRenderer.invoke(`delete-bookmark:db`, { id }),
+  updateBookmarkName: ({ id, name }) =>
+    ipcRenderer.invoke(`update-bookmark-name:db`, { id, name }),
+  bookmarkUrlExist: ({ url }) =>
+    ipcRenderer.invoke(`bookmark-url-exist:db`, { url }),
+  openInFileManager: ({ filePath }) =>
+    ipcRenderer.send(`open-in-file-manager`, { filePath }),
+  toggleMenuBar: () => ipcRenderer.send(`toggle-menu-bar`),
+  openDevTools: () => ipcRenderer.send(`open-dev-tools`),
 
-    onTabCreated: (callback) => ipcRenderer.on(`tab-created`, callback),
-    onTabClosed: (callback) => ipcRenderer.on(`tab-closed`, callback),
-    onTabTitleUpdated: (callback) => ipcRenderer.on(`tab-title-updated`, callback),
-    onTabUrlUpdated: (callback) => ipcRenderer.on('tab-url-updated', callback),
-    onTabLoadingStart: (callback) => ipcRenderer.on('tab-loading-start', callback),
-    onTabLoadingStop: (callback) => ipcRenderer.on('tab-loading-stop', callback),
-    onTabFaviconUpdated: (callback) => ipcRenderer.on('tab-favicon-updated', callback),
-    onTabSwitched: (callback) => ipcRenderer.on(`tab-switched`, callback),
-    onTabBookmarked: (callback) => ipcRenderer.on(`tab-bookmarked`, callback),
-    onRemoveBookmarked: (callback) => ipcRenderer.on(`remove-bookmarked`, callback),
+  onTabCreated: (callback) => ipcRenderer.on(`tab-created`, callback),
+  onTabClosed: (callback) => ipcRenderer.on(`tab-closed`, callback),
+  onTabTitleUpdated: (callback) =>
+    ipcRenderer.on(`tab-title-updated`, callback),
+  onTabUrlUpdated: (callback) => ipcRenderer.on("tab-url-updated", callback),
+  onTabLoadingStart: (callback) =>
+    ipcRenderer.on("tab-loading-start", callback),
+  onTabLoadingStop: (callback) => ipcRenderer.on("tab-loading-stop", callback),
+  onTabFaviconUpdated: (callback) =>
+    ipcRenderer.on("tab-favicon-updated", callback),
+  onTabSwitched: (callback) => ipcRenderer.on(`tab-switched`, callback),
+  onTabBookmarked: (callback) => ipcRenderer.on(`tab-bookmarked`, callback),
+  onRemoveBookmarked: (callback) =>
+    ipcRenderer.on(`remove-bookmarked`, callback),
+  onShowBookmarks: (callback) => ipcRenderer.on(`show-bookmarks`, callback),
+  onHideBookmarks: (callback) => ipcRenderer.on(`hide-bookmarks`, callback),
 
-    offTabCreated: (callback) => ipcRenderer.removeListener(`tab-created`, callback),
-    offTabClosed: (callback) => ipcRenderer.removeListener(`tab-closed`, callback),
-    offTabTitleUpdated: (callback) => ipcRenderer.removeListener(`tab-title-updated`, callback),
-    offTabUrlUpdated: (callback) => ipcRenderer.removeListener('tab-url-updated', callback),
-    offTabLoadingStart: (callback) => ipcRenderer.removeListener('tab-loading-start', callback),
-    offTabLoadingStop: (callback) => ipcRenderer.removeListener('tab-loading-stop', callback),
-    offTabFaviconUpdated: (callback) => ipcRenderer.removeListener('tab-favicon-updated', callback),
-    offTabSwitched: (callback) => ipcRenderer.removeListener(`tab-switched`, callback),
-    offTabBookmarked: (callback) => ipcRenderer.removeListener(`tab-bookmarked`, callback),
-    offRemoveBookmarked: (callback) => ipcRenderer.removeListener(`remove-bookmarked`, callback),
-})
+  offTabCreated: (callback) =>
+    ipcRenderer.removeListener(`tab-created`, callback),
+  offTabClosed: (callback) =>
+    ipcRenderer.removeListener(`tab-closed`, callback),
+  offTabTitleUpdated: (callback) =>
+    ipcRenderer.removeListener(`tab-title-updated`, callback),
+  offTabUrlUpdated: (callback) =>
+    ipcRenderer.removeListener("tab-url-updated", callback),
+  offTabLoadingStart: (callback) =>
+    ipcRenderer.removeListener("tab-loading-start", callback),
+  offTabLoadingStop: (callback) =>
+    ipcRenderer.removeListener("tab-loading-stop", callback),
+  offTabFaviconUpdated: (callback) =>
+    ipcRenderer.removeListener("tab-favicon-updated", callback),
+  offTabSwitched: (callback) =>
+    ipcRenderer.removeListener(`tab-switched`, callback),
+  offTabBookmarked: (callback) =>
+    ipcRenderer.removeListener(`tab-bookmarked`, callback),
+  offRemoveBookmarked: (callback) =>
+    ipcRenderer.removeListener(`remove-bookmarked`, callback),
+  offShowBookmarks: (callback) =>
+    ipcRenderer.removeListener(`show-bookmarks`, callback),
+  offHideBookmarks: (callback) =>
+    ipcRenderer.removeListener(`hide-bookmarks`, callback),
+});

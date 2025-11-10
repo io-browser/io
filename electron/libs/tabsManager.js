@@ -1,7 +1,7 @@
 import { app, WebContentsView } from "electron";
 import { nanoid } from "@reduxjs/toolkit";
 import path from "path";
-import { fileURLToPath } from "url"
+import { fileURLToPath } from "url";
 import { isValidUrl } from "../utils/index.js";
 import HistoryManager from "./historyManager.js";
 import db, { saveDb } from "../config/db.js";
@@ -12,394 +12,432 @@ const __dirname = path.dirname(__filename);
 const history = new HistoryManager();
 
 export default class TabsManager {
-    constructor(mainWindow) {
-        this.mainWindow = mainWindow;
-        this.activeTabId = null;
-        this.tabs = new Map();
-        this.uiHieght = 80; // 80px
-        this.uiWidth = 0; // 0 px
+  constructor(mainWindow) {
+    this.mainWindow = mainWindow;
+    this.activeTabId = null;
+    this.tabs = new Map();
+    this.uiHeight = 80; // 80px
+    this.uiWidth = 0; // 0 px
 
-        this.setupResizeHandling();
+    this.setupResizeHandling();
+  }
+
+  createTab(tabId, url = "https://startpage.com/") {
+    const view = new WebContentsView({
+      webPreferences: {
+        nodeIntegration: false,
+        contextIsolation: true,
+        sandbox: true,
+        webSecurity: true,
+        allowRunningInsecureContent: false,
+        experimentalFeatures: false,
+        preload: path.join(__dirname, "../", "preload.cjs"),
+      },
+    });
+
+    this.tabs.set(tabId, {
+      view,
+      url,
+      favicon: null,
+      title: "New Tab",
+      isLoading: false,
+    });
+
+    this.initializeTabEventListeners(tabId);
+
+    this.switchToTab(tabId);
+
+    this.activeTabId = tabId;
+    this.mainWindow.contentView.addChildView(view);
+    view.webContents.loadURL(url);
+    view.setBounds({
+      x: 0,
+      y: this.uiHeight,
+      width: this.mainWindow.getBounds().width - this.uiWidth,
+      height: this.mainWindow.getBounds().height - this.uiHeight,
+    });
+  }
+
+  closeTab(tabId) {
+    if (Array.from(this.tabs).length <= 1) return;
+
+    const tab = this.tabs.get(tabId);
+    if (!tab) {
+      console.error(`Tab ${tabId} not found`);
+      return false;
     }
 
-    createTab(tabId, url = 'https://startpage.com/') {
+    // If this is the active tab, we need to switch to another
+    const wasActive = this.activeTabId == tabId;
 
-        const view = new WebContentsView({
-            webPreferences: {
-                nodeIntegration: false,
-                contextIsolation: true,
-                sandbox: true,
-                webSecurity: true,
-                allowRunningInsecureContent: false,
-                experimentalFeatures: false,
-                preload: path.join(__dirname, "../", 'preload.cjs'),
-            }
-        });
+    // Remove from window if active
+    if (wasActive) {
+      this.mainWindow.contentView.removeChildView(tab.view);
+      this.activeTabId = null;
+    }
 
-        this.tabs.set(tabId, {
-            view,
+    // Destroy the webContents to free memory
+    if (!tab.view.webContents.isDestroyed()) {
+      tab.view.webContents.removeAllListeners();
+      tab.view.webContents.destroy();
+    }
+
+    // Remove from tabs map
+    this.tabs.delete(tabId);
+
+    // If this was the active tab, switch to another tab
+    if (wasActive && this.tabs.size > 0) {
+      // Switch to the last tab
+      const remainingTabs = Array.from(this.tabs.keys());
+      const nextTabId = remainingTabs[remainingTabs.length - 1];
+      this.activeTabId = nextTabId;
+      this.switchToTab(nextTabId);
+    }
+  }
+
+  initializeTabEventListeners(tabId) {
+    const tab = this.tabs.get(tabId);
+
+    if (!tab) {
+      console.error(`Tab does not found`, tabId);
+      return null;
+    }
+
+    tab.view.webContents.on(`page-title-updated`, (_, title) => {
+      tab.title = title;
+
+      history.updateTitle(title);
+      this.mainWindow.webContents.send("tab-title-updated", { tabId, title });
+    });
+
+    tab.view.webContents.on("page-favicon-updated", (event, favicons) => {
+      const favicon = favicons.length > 0 ? favicons[0] : null;
+      tab.favicon = favicon;
+
+      history.updateFavicon(favicon);
+      this.mainWindow.webContents.send("tab-favicon-updated", {
+        tabId,
+        favicon,
+      });
+    });
+
+    tab.view.webContents.on("did-start-loading", () => {
+      tab.isLoading = true;
+      this.mainWindow.webContents.send("tab-loading-start", { tabId });
+    });
+
+    tab.view.webContents.on("did-stop-loading", () => {
+      tab.isLoading = false;
+      this.mainWindow.webContents.send("tab-loading-stop", { tabId });
+    });
+
+    tab.view.webContents.setWindowOpenHandler(
+      ({ url, frameName, _, disposition }) => {
+        const newTabId = nanoid();
+
+        if (disposition === "new-window" || disposition === "foreground-tab") {
+          this.mainWindow.webContents.send("tab-created", {
+            tabId: newTabId,
+            isActive: true,
+            favicon: tab.favicon,
+            title: tab.title,
             url,
+          });
+        } else if (disposition === "background-tab") {
+          this.mainWindow.webContents.send("tab-created", {
+            tabId: newTabId,
+            isActive: true,
             favicon: null,
-            title: 'New Tab',
-            isLoading: false,
-        });
-
-        this.initializeTabEventListeners(tabId)
-
-        this.switchToTab(tabId);
-
-        this.activeTabId = tabId;
-        this.mainWindow.contentView.addChildView(view)
-        view.webContents.loadURL(url);
-        view.setBounds({ x: 0, y: this.uiHieght, width: this.mainWindow.getBounds().width - this.uiWidth, height: this.mainWindow.getBounds().height - this.uiHieght });
-    }
-
-    closeTab(tabId) {
-
-        if (Array.from(this.tabs).length <= 1) return;
-
-        const tab = this.tabs.get(tabId);
-        if (!tab) {
-            console.error(`Tab ${tabId} not found`);
-            return false;
+            title: "New Tab",
+            url,
+          });
+        } else {
+          this.mainWindow.webContents.send("tab-created", {
+            tabId: newTabId,
+            isActive: true,
+            favicon: tab.favicon,
+            title: tab.title,
+            url,
+          });
         }
+        return { action: "deny" };
+      }
+    );
 
-        // If this is the active tab, we need to switch to another
-        const wasActive = this.activeTabId == tabId;
+    tab.view.webContents.on("did-navigate", (_, url) => {
+      tab.url = url;
 
-        // Remove from window if active
-        if (wasActive) {
-            this.mainWindow.contentView.removeChildView(tab.view);
-            this.activeTabId = null;
-        }
+      if (history.pendingEntry) {
+        history.pendingEntry.url = url;
+      }
 
-        // Destroy the webContents to free memory
-        if (!tab.view.webContents.isDestroyed()) {
-            tab.view.webContents.removeAllListeners()
-            tab.view.webContents.destroy();
-        }
+      this.mainWindow.webContents.send("tab-url-updated", {
+        tabId,
+        url,
+      });
+    });
 
-        // Remove from tabs map
-        this.tabs.delete(tabId);
+    tab.view.webContents.on(
+      "did-navigate-in-page",
+      (event, url, isMainFrame) => {
+        if (isMainFrame) {
+          tab.url = url;
 
-        // If this was the active tab, switch to another tab
-        if (wasActive && this.tabs.size > 0) {
-            // Switch to the last tab
-            const remainingTabs = Array.from(this.tabs.keys());
-            const nextTabId = remainingTabs[remainingTabs.length - 1];
-            this.activeTabId = nextTabId;
-            this.switchToTab(nextTabId);
-        }
-    }
-
-    initializeTabEventListeners(tabId) {
-
-        const tab = this.tabs.get(tabId);
-
-        if (!tab) {
-            console.error(`Tab does not found`, tabId);
-            return null;
-        }
-
-        tab.view.webContents.on(`page-title-updated`, (_, title) => {
-            tab.title = title;
-
-            history.updateTitle(title)
-            this.mainWindow.webContents.send('tab-title-updated', { tabId, title });
-        });
-
-        tab.view.webContents.on('page-favicon-updated', (event, favicons) => {
-            const favicon = favicons.length > 0 ? favicons[0] : null;
-            tab.favicon = favicon;
-
-            history.updateFavicon(favicon)
-            this.mainWindow.webContents.send('tab-favicon-updated', { tabId, favicon });
-        });
-
-        tab.view.webContents.on('did-start-loading', () => {
-            tab.isLoading = true;
-            this.mainWindow.webContents.send('tab-loading-start', { tabId });
-        });
-
-        tab.view.webContents.on('did-stop-loading', () => {
-            tab.isLoading = false;
-            this.mainWindow.webContents.send('tab-loading-stop', { tabId });
-        });
-
-        tab.view.webContents.setWindowOpenHandler(({ url, frameName, _, disposition }) => {
-
-            const newTabId = nanoid();
-
-            if (disposition === 'new-window' || disposition === 'foreground-tab') {
-                this.mainWindow.webContents.send('tab-created', {
-                    tabId: newTabId,
-                    isActive: true,
-                    favicon: tab.favicon,
-                    title: tab.title,
-                    url,
-                });
-            } else if (disposition === 'background-tab') {
-                this.mainWindow.webContents.send('tab-created', {
-                    tabId: newTabId,
-                    isActive: true,
-                    favicon: null,
-                    title: 'New Tab',
-                    url,
-                });
-            } else {
-                this.mainWindow.webContents.send('tab-created', {
-                    tabId: newTabId,
-                    isActive: true,
-                    favicon: tab.favicon,
-                    title: tab.title,
-                    url,
-                });
-            }
-            return { action: 'deny' };
-        });
-
-        tab.view.webContents.on('did-navigate', (_, url) => {
-            tab.url = url;
-
-            if (history.pendingEntry) {
-                history.pendingEntry.url = url;
-            }
-
-            this.mainWindow.webContents.send('tab-url-updated', {
-                tabId,
-                url,
-            });
-        });
-
-        tab.view.webContents.on('did-navigate-in-page', (event, url, isMainFrame) => {
-            if (isMainFrame) {
-                tab.url = url;
-
-                this.mainWindow.webContents.send('tab-url-updated', {
-                    tabId,
-                    url,
-                });
-            }
-        });
-
-        tab.view.webContents.on('did-start-navigation', (event, url, isInPlace, isMainFrame) => {
-            if (isMainFrame && !isInPlace) {
-                history.createPendingEntry(url);
-            }
-        });
-
-        tab.view.webContents.on('did-finish-load', () => {
-            // Small delay to ensure title/favicon events have fired
-            setTimeout(() => {
-                history.finalizeEntry();
-            }, 100);
-        });
-    }
-
-    switchToTab(tabId, uiDimensions = null) {
-
-        if (Array.from(this.tabs).length <= 1) return;
-
-        const tab = this.tabs.get(tabId);
-        const activeTab = this.tabs.get(this.activeTabId);
-
-        if (!tab) {
-            console.error(`Tab ${tabId} not found`);
-            return false;
-        }
-
-        // Hide current active tab
-        if (this.activeTabId && this.activeTabId !== tabId) {
-            const currentTab = this.tabs.get(this.activeTabId);
-            if (currentTab) {
-                this.mainWindow.contentView.removeChildView(currentTab.view);
-            }
-        }
-
-        this.mainWindow.contentView.removeChildView(activeTab.view)
-        this.mainWindow.contentView.addChildView(tab.view)
-
-        this.activeTabId = tabId;
-
-        // Focus the webContents
-        tab.view.webContents.focus();
-
-        // Notify renderer
-        this.mainWindow.webContents.send('tab-switched', {
+          this.mainWindow.webContents.send("tab-url-updated", {
             tabId,
-            url: tab.url,
-            title: tab.title
-        });
-
-        return true;
-    }
-
-    reloadTab(tabId) {
-
-        const tab = this.tabs.get(tabId);
-
-        if (!tab) {
-            console.error(`Tab ${tabId} not found`);
-            return false;
+            url,
+          });
         }
+      }
+    );
 
-        tab.view.webContents.reload()
-    }
-
-    updateTabUrl(tabId, url) {
-
-        const tab = this.tabs.get(tabId);
-
-        if (!tab) {
-            console.error(`Tab ${tabId} not found`);
-            return false;
+    tab.view.webContents.on(
+      "did-start-navigation",
+      (event, url, isInPlace, isMainFrame) => {
+        if (isMainFrame && !isInPlace) {
+          history.createPendingEntry(url);
         }
+      }
+    );
 
-        const isValid = isValidUrl(url)
+    tab.view.webContents.on("did-finish-load", () => {
+      // Small delay to ensure title/favicon events have fired
+      setTimeout(() => {
+        history.finalizeEntry();
+      }, 100);
+    });
+  }
 
-        if (isValid && (isValid.protocol === "http:" || isValid.protocol === "https:")) tab.view.webContents.loadURL(url);
-        else if (isValid && isValid.protocol === "io:") tab.view.webContents.loadURL(!app.isPackaged ? `http://localhost:5173/#/${isValid.host}` : `file://${path.join(__dirname, `../../dist/index.html#`)}/${isValid.host}`)
-        else tab.view.webContents.loadURL(`https://startpage.com/sp/search?query=${url}`)
+  switchToTab(tabId, uiDimensions = null) {
+    if (Array.from(this.tabs).length <= 1) return;
+
+    const tab = this.tabs.get(tabId);
+    const activeTab = this.tabs.get(this.activeTabId);
+
+    if (!tab) {
+      console.error(`Tab ${tabId} not found`);
+      return false;
     }
 
-    goBack() {
-        const tab = this.tabs.get(this.activeTabId);
-
-        if (!tab) {
-            console.error(`No active tab found`);
-            return false;
-        }
-
-        tab.view.webContents.navigationHistory.goBack()
+    // Hide current active tab
+    if (this.activeTabId && this.activeTabId !== tabId) {
+      const currentTab = this.tabs.get(this.activeTabId);
+      if (currentTab) {
+        this.mainWindow.contentView.removeChildView(currentTab.view);
+      }
     }
 
-    goForward() {
-        const tab = this.tabs.get(this.activeTabId);
+    this.mainWindow.contentView.removeChildView(activeTab.view);
+    this.mainWindow.contentView.addChildView(tab.view);
 
-        if (!tab) {
-            console.error(`No active tab found`);
-            return false;
-        }
+    this.activeTabId = tabId;
 
-        tab.view.webContents.navigationHistory.goForward()
+    // Focus the webContents
+    tab.view.webContents.focus();
+
+    // Notify renderer
+    this.mainWindow.webContents.send("tab-switched", {
+      tabId,
+      url: tab.url,
+      title: tab.title,
+    });
+
+    return true;
+  }
+
+  reloadTab(tabId) {
+    const tab = this.tabs.get(tabId);
+
+    if (!tab) {
+      console.error(`Tab ${tabId} not found`);
+      return false;
     }
 
-    openDevTools() {
+    tab.view.webContents.reload();
+  }
 
-        const tab = this.tabs.get(this.activeTabId);
+  updateTabUrl(tabId, url) {
+    const tab = this.tabs.get(tabId);
 
-        if (!tab) {
-            console.error(`No active tab found`);
-            return false;
-        }
-
-        tab.view.webContents.openDevTools()
+    if (!tab) {
+      console.error(`Tab ${tabId} not found`);
+      return false;
     }
 
-    toggleDevTools() {
+    const isValid = isValidUrl(url);
 
-        const tab = this.tabs.get(this.activeTabId);
+    if (
+      isValid &&
+      (isValid.protocol === "http:" || isValid.protocol === "https:")
+    )
+      tab.view.webContents.loadURL(url);
+    else if (isValid && isValid.protocol === "io:")
+      tab.view.webContents.loadURL(
+        !app.isPackaged
+          ? `http://localhost:5173/#/${isValid.host}`
+          : `file://${path.join(__dirname, `../../dist/index.html#`)}/${
+              isValid.host
+            }`
+      );
+    else
+      tab.view.webContents.loadURL(
+        `https://startpage.com/sp/search?query=${url}`
+      );
+  }
 
-        if (!tab) {
-            console.error(`No active tab found`);
-            return false;
-        }
+  goBack() {
+    const tab = this.tabs.get(this.activeTabId);
 
-        tab.view.webContents.toggleDevTools()
+    if (!tab) {
+      console.error(`No active tab found`);
+      return false;
     }
 
-    bookmarkActiveTab() {
+    tab.view.webContents.navigationHistory.goBack();
+  }
 
-        const tab = this.tabs.get(this.activeTabId);
+  goForward() {
+    const tab = this.tabs.get(this.activeTabId);
 
-        if (!tab) {
-            console.error(`No active tab found`);
-            return false;
-        }
-
-        db()?.run(`INSERT INTO bookmarks (favicon, name, url) VALUES (?, ?, ?)`, [tab.favicon, tab.title, tab.url]);
-        saveDb(db());
-
-        const [{ values: [[id]] }] = db().exec("SELECT MAX(id) FROM bookmarks");
-
-        this.mainWindow.webContents.send(`tab-bookmarked`, { id: id, favicon: tab.favicon, name: tab.title, url: tab.url })
+    if (!tab) {
+      console.error(`No active tab found`);
+      return false;
     }
 
-    removeBookmarkForActiveTab() {
+    tab.view.webContents.navigationHistory.goForward();
+  }
 
-        const tab = this.tabs.get(this.activeTabId);
-        if (!tab) {
-            console.error(`No active tab found`);
-            return false;
-        }
+  openDevTools() {
+    const tab = this.tabs.get(this.activeTabId);
 
-        const [{ values: [[id]] }] = db().exec("SELECT MAX(id) FROM bookmarks");
-
-        db()?.run(`DELETE FROM bookmarks WHERE url = ?`, [tab.url]);
-        saveDb(db())
-
-        this.mainWindow.webContents.send(`remove-bookmarked`, { id: id })
+    if (!tab) {
+      console.error(`No active tab found`);
+      return false;
     }
 
-    toggleMenuBar() {
-        if (this.uiWidth) {
-            this.uiWidth = 0;
-            this.updateActiveTabBounds();
-        } else {
-            this.uiWidth = 260;
-            this.updateActiveTabBounds();
-        }
+    tab.view.webContents.openDevTools();
+  }
+
+  toggleDevTools() {
+    const tab = this.tabs.get(this.activeTabId);
+
+    if (!tab) {
+      console.error(`No active tab found`);
+      return false;
     }
 
-    toggleBookmarksSection() {
-        if (this.uiHieght === 112) {
-            this.uiHieght -= 32;
-            this.updateActiveTabBounds();
-        } else {
-            this.uiHieght = 112;
-            this.updateActiveTabBounds();
-        }
+    tab.view.webContents.toggleDevTools();
+  }
+
+  bookmarkActiveTab() {
+    const tab = this.tabs.get(this.activeTabId);
+
+    if (!tab) {
+      console.error(`No active tab found`);
+      return false;
     }
 
-    setupResizeHandling() {
-        // Handle resize events
-        this.mainWindow.on('resize', () => {
-            this.updateActiveTabBounds();
-        });
+    db()?.run(`INSERT INTO bookmarks (favicon, name, url) VALUES (?, ?, ?)`, [
+      tab.favicon,
+      tab.title,
+      tab.url,
+    ]);
+    saveDb(db());
 
-        // Handle window state changes
-        this.mainWindow.on('maximize', () => {
-            this.updateActiveTabBounds();
-        });
+    const [
+      {
+        values: [[id]],
+      },
+    ] = db().exec("SELECT MAX(id) FROM bookmarks");
 
-        this.mainWindow.on('unmaximize', () => {
-            this.updateActiveTabBounds();
-        });
+    this.mainWindow.webContents.send(`tab-bookmarked`, {
+      id: id,
+      favicon: tab.favicon,
+      name: tab.title,
+      url: tab.url,
+    });
+  }
 
-        this.mainWindow.on('restore', () => {
-            this.updateActiveTabBounds();
-        });
+  removeBookmarkForActiveTab() {
+    const tab = this.tabs.get(this.activeTabId);
+    if (!tab) {
+      console.error(`No active tab found`);
+      return false;
     }
 
-    updateActiveTabBounds() {
-        if (this.activeTabId) {
-            const activeTab = this.tabs.get(this.activeTabId);
-            if (activeTab) {
-                this.updateSingleTabBounds(activeTab.view);
-            }
-        }
+    const [
+      {
+        values: [[id]],
+      },
+    ] = db().exec("SELECT MAX(id) FROM bookmarks");
+
+    db()?.run(`DELETE FROM bookmarks WHERE url = ?`, [tab.url]);
+    saveDb(db());
+
+    this.mainWindow.webContents.send(`remove-bookmarked`, { id: id });
+  }
+
+  toggleBookmarksSection() {
+    if (this.uiHeight === 112) {
+      this.uiHeight -= 32;
+      this.updateActiveTabBounds();
+      this.mainWindow.webContents.send(`hide-bookmarks`, true);
+    } else {
+      this.uiHeight = 112;
+      this.updateActiveTabBounds();
+      this.mainWindow.webContents.send(`show-bookmarks`, true);
     }
+  }
 
-    updateSingleTabBounds(view) {
-        const windowBounds = this.mainWindow.getBounds();
-
-        const newBounds = {
-            x: 0,
-            y: this.uiHieght,
-            width: windowBounds.width - this.uiWidth,
-            height: windowBounds.height - this.uiHieght
-        };
-
-        view.setBounds(newBounds);
+  toggleMenuBar() {
+    if (this.uiWidth) {
+      this.uiWidth = 0;
+      this.updateActiveTabBounds();
+    } else {
+      this.uiWidth = 260;
+      this.updateActiveTabBounds();
     }
+  }
+
+  setupResizeHandling() {
+    // Handle resize events
+    this.mainWindow.on("resize", () => {
+      this.updateActiveTabBounds();
+    });
+
+    // Handle window state changes
+    this.mainWindow.on("maximize", () => {
+      this.updateActiveTabBounds();
+    });
+
+    this.mainWindow.on("unmaximize", () => {
+      this.updateActiveTabBounds();
+    });
+
+    this.mainWindow.on("restore", () => {
+      this.updateActiveTabBounds();
+    });
+  }
+
+  updateActiveTabBounds() {
+    if (this.activeTabId) {
+      const activeTab = this.tabs.get(this.activeTabId);
+      if (activeTab) {
+        this.updateSingleTabBounds(activeTab.view);
+      }
+    }
+  }
+
+  updateSingleTabBounds(view) {
+    const windowBounds = this.mainWindow.getBounds();
+
+    const newBounds = {
+      x: 0,
+      y: this.uiHeight,
+      width: windowBounds.width - this.uiWidth,
+      height: windowBounds.height - this.uiHeight,
+    };
+
+    view.setBounds(newBounds);
+  }
 }
