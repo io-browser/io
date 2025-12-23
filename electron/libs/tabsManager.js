@@ -90,8 +90,9 @@ export default class TabsManager {
       // Switch to the last tab
       const remainingTabs = Array.from(this.tabs.keys());
       const nextTabId = remainingTabs[remainingTabs.length - 1];
+      const nextTab = this.tabs.get(nextTabId);
+      this.mainWindow.contentView.addChildView(nextTab.view);
       this.activeTabId = nextTabId;
-      this.switchToTab(nextTabId);
     }
   }
 
