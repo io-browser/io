@@ -1,5 +1,18 @@
 # io
 
+## 1.2.0
+
+### Minor Changes
+
+- 8e3d790: fix the last tab bug
+
+### Patch Changes
+
+- e697e1c: favicon change
+- 0ccddde: favicon fixed when connection lost
+- 7b54ac7: Fix bookmarks glitch with menu bar
+- aca5471: remove devtools opening
+
 ## 1.1.1
 
 ### Patch Changes
